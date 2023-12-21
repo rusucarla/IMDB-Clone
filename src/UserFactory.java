@@ -1,0 +1,16 @@
+public class UserFactory {
+    // builder pentru user
+    // user poate fi de tip regular, contributor sau admin (staff)
+    // information e clasa interna a userului
+    public static User createUser(AccountType type, User.Information info,
+                                  AccountType cont, String username, int exp) {
+        if (type == AccountType.REGULAR) {
+            return new Regular(info, cont, username, exp);
+        } else if (type == AccountType.CONTRIBUTOR) {
+            return new Contributor(info, cont, username, exp);
+        } else if (type == AccountType.ADMIN) {
+            return new Admin(info, cont, username, exp);
+        }
+        return null;
+    }
+}
