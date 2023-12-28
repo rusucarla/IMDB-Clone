@@ -1,12 +1,29 @@
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+
 import java.util.List;
 
+
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
+@JsonSubTypes({
+        @JsonSubTypes.Type(value = Movie.class, name = "Movie"),
+        @JsonSubTypes.Type(value = Series.class, name = "Series")
+})
 public abstract class Production implements Comparable<Production> {
+    @JsonProperty("title")
     protected String titlu;
+    @JsonProperty("directors")
     protected List<String> regizoriList;
+    @JsonProperty("actors")
     protected List<String> actoriList;
+    @JsonProperty("genres")
     protected List<String> genreList;
+    @JsonProperty("ratings")
     protected List<Rating> ratingList;
+    @JsonProperty("plot")
     protected String descriereFilm;
+    @JsonProperty("averageRating")
     protected double notaFilm;
 
     // constructor
@@ -21,7 +38,9 @@ public abstract class Production implements Comparable<Production> {
         // se va calcula nota
         calculNota();
     }
-
+    // constructor gol
+    public Production() {
+    }
     // calcul nota finala
     private void calculNota() {
         if (ratingList != null && !ratingList.isEmpty()) {

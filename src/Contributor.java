@@ -1,4 +1,9 @@
-public class Contributor extends Staff implements RequestManager{
+public class Contributor extends Staff implements RequestManager {
+    //constructor fara nimic
+    public Contributor() {
+        super();
+    }
+
     public Contributor(Information info, AccountType cont, String username, int exp) {
         super(info, cont, username, exp);
     }

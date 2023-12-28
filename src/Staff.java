@@ -2,37 +2,65 @@ import java.util.*;
 
 public class Staff extends User implements StaffInterface {
     private List<Request> requestList;
-    private SortedSet<Production> addedProductions;
-    private SortedSet<Actor> addedActors;
+    private TreeSet<Production> productionsContribution;
+    private TreeSet<Actor> actorsContribution;
 
     public Staff(Information info, AccountType cont, String username, int exp) {
         super(info, cont, username, exp);
         this.requestList = new ArrayList<>();
-        this.addedProductions = new TreeSet<>();
-        this.addedActors = new TreeSet<>();
+        this.productionsContribution = new TreeSet<>();
+        this.actorsContribution = new TreeSet<>();
+    }
+
+    public Staff() {
+        super();
+    }
+
+    public List<Request> getRequestList() {
+        return requestList;
+    }
+
+    public void setRequestList(List<Request> requestList) {
+        this.requestList = requestList;
+    }
+
+    public SortedSet<Production> getProductionsContribution() {
+        return productionsContribution;
+    }
+
+    public void setProductionsContribution(TreeSet<Production> productionsContribution) {
+        this.productionsContribution = productionsContribution;
+    }
+
+    public TreeSet<Actor> getActorsContribution() {
+        return actorsContribution;
+    }
+
+    public void setActorsContribution(TreeSet<Actor> actorsContribution) {
+        this.actorsContribution = actorsContribution;
     }
 
     @Override
     public void addProductionSystem(Production p) {
-        addedProductions.add(p);
+        productionsContribution.add(p);
     }
 
     @Override
     public void addActorSystem(Actor a) {
-        addedActors.add(a);
+        actorsContribution.add(a);
     }
 
     private boolean isProductionMine(Production p) {
-        return addedProductions.contains(p);
+        return productionsContribution.contains(p);
     }
 
     private boolean isActorMine(Actor a) {
-        return addedActors.contains(a);
+        return actorsContribution.contains(a);
     }
 
     @Override
     public void removeProductionSystem(String name) {
-        Iterator<Production> iterator = addedProductions.iterator();
+        Iterator<Production> iterator = productionsContribution.iterator();
         while (iterator.hasNext()) {
             Production p = iterator.next();
             if (p.getTitlu().equals(name)) {
@@ -44,7 +72,7 @@ public class Staff extends User implements StaffInterface {
 
     @Override
     public void removeActorSystem(String name) {
-        Iterator<Actor> iterator = addedActors.iterator();
+        Iterator<Actor> iterator = actorsContribution.iterator();
         while (iterator.hasNext()) {
             Actor a = iterator.next();
             if (a.getName().equals(name)) {
@@ -57,7 +85,7 @@ public class Staff extends User implements StaffInterface {
 
     @Override
     public void updateProduction(Production p) {
-        for (Production new_p : addedProductions) {
+        for (Production new_p : productionsContribution) {
             if (new_p.getTitlu().equals(p.getTitlu())) {
                 if (isProductionMine(p)) {
                     p.setActoriList(new_p.getActoriList());
@@ -77,7 +105,7 @@ public class Staff extends User implements StaffInterface {
 
     @Override
     public void updateActor(Actor a) {
-        for (Actor new_a : addedActors) {
+        for (Actor new_a : actorsContribution) {
             if (a.getName().equals(new_a.getName())) {
                 if (isActorMine(a)) {
                     a.setBiography(new_a.getBiography());

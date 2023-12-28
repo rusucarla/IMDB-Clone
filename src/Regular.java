@@ -31,4 +31,26 @@ public class Regular extends User implements RequestManager {
     public void removeRequest(Request removed_request) {
 
     }
+
+    public void displayInfo() {
+        System.out.println("Nume: " + this.getInformation().getUserNume());
+        System.out.println("Email: " + this.getInformation().getUserCredentials().getEmail());
+        System.out.println("Data nasterii: " + this.getInformation().getBirthDate());
+        System.out.println("Limba preferata: " + this.getInformation().getUserCountry());
+        System.out.println("Username: " + this.getUserName());
+        System.out.println("Tip cont: " + this.getUserType());
+        System.out.println("Experienta: " + this.getExperience());
+//        System.out.println("Rating-uri: ");
+//        for (Rating rating : userRatings) {
+//            System.out.println(rating.getNota() + " " + rating.getComentariiRater());
+//        }
+//        System.out.println("Actori favoriti: ");
+//        for (Actor actor : this.favoriteActors) {
+//            System.out.println(actor.getName());
+//        }
+//        System.out.println("Productii favorite: ");
+//        for (Production production : this.favoriteProductions) {
+//            System.out.println(production.getTitlu());
+//        }
+    }
 }
