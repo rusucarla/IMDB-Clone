@@ -40,17 +40,17 @@ public class Regular extends User implements RequestManager {
         System.out.println("Username: " + this.getUserName());
         System.out.println("Tip cont: " + this.getUserType());
         System.out.println("Experienta: " + this.getExperience());
-//        System.out.println("Rating-uri: ");
-//        for (Rating rating : userRatings) {
-//            System.out.println(rating.getNota() + " " + rating.getComentariiRater());
-//        }
-//        System.out.println("Actori favoriti: ");
-//        for (Actor actor : this.favoriteActors) {
-//            System.out.println(actor.getName());
-//        }
-//        System.out.println("Productii favorite: ");
-//        for (Production production : this.favoriteProductions) {
-//            System.out.println(production.getTitlu());
-//        }
+        System.out.println("Rating-uri: ");
+        for (Rating rating : userRatings) {
+            System.out.println(rating.getNota() + " " + rating.getComentariiRater());
+        }
+        System.out.println("Actori favoriti: ");
+        for (Actor actor : this.favoriteActors) {
+            System.out.println(actor.getName());
+        }
+        System.out.println("Productii favorite: ");
+        for (Production production : this.favoriteProductions) {
+            System.out.println(production.getTitlu());
+        }
     }
 }

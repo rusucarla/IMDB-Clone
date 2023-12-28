@@ -14,6 +14,7 @@ public class Main {
         imdb.loadActors(actorsPath);
         imdb.loadProductions(productionsPath);
         imdb.loadUsers(usersPath);
-
+        LoginFrame frame = new LoginFrame();
+        frame.setVisible(true);
     }
 }

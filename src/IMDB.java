@@ -12,6 +12,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 // singleton pattern pentru IMDB
 // contine listele de regular, actor, request, movie, series
@@ -200,7 +201,9 @@ public class IMDB {
                     assert user != null;
                     user.setFavoriteProductions(favoriteProductions);
                 }
-
+                // adaug si in lista user pentru login
+                userList.add(user);
+                // adauga user in lista potrivita
                 if (user instanceof Regular) {
                     regularList.add((Regular) user);
                 } else if (user instanceof Contributor) {
@@ -266,13 +269,28 @@ public class IMDB {
                 }
 
             }
-            // afiseaza lista de regular
-            System.out.println("Regular:");
-            for (Regular regular : regularList) {
-                regular.displayInfo();
-            }
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
+    public boolean checkLogin(String username, String password){
+        for(User user : userList){
+            if(user.getUserName().equals(username) && user.getInformation().getUserCredentials().getPassword().equals(password)){
+                return true;
+            }
+        }
+        return false;
+    }
+    // getter pentru lista de producții
+    public List<Production> getProductionList() {
+        return productionList;
+    }
+    // filtre pentru producții
+    // filtru pentru an
+    public List<Production> filterByRating(double minRating) {
+        return productionList.stream()
+                .filter(p -> p.getNotaFilm() >= minRating)
+                .collect(Collectors.toList());
+    }
+
 }

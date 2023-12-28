@@ -4,16 +4,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.TreeSet;
 
-//@JsonTypeInfo(
-//        use = JsonTypeInfo.Id.NAME,
-//        include = JsonTypeInfo.As.EXISTING_PROPERTY,
-//        property = "userType"
-//)
-//@JsonSubTypes({
-//        @JsonSubTypes.Type(value = Regular.class, name = "Regular"),
-//        @JsonSubTypes.Type(value = Admin.class, name = "Admin"),
-//        @JsonSubTypes.Type(value = Contributor.class, name = "Contributor")
-//})
+
 public abstract class User implements Comparable<User> {
     public TreeSet<Actor> favoriteActors;
     public TreeSet<Production> favoriteProductions;
