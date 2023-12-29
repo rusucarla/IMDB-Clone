@@ -46,6 +46,7 @@ public class LoginFrame extends JFrame {
                 // Verifică corectitudinea parolei
                 String user = userText.getText();
                 String password = new String(passwordText.getPassword());
+                String userType = imdb.checkUserType(user);
                 if (imdb.checkLogin(user, password)) {
                     // Continuă în funcție de alegerea utilizatorului
                     String[] options = {"GUI", "CLI"};
@@ -55,10 +56,10 @@ public class LoginFrame extends JFrame {
 
                     if (response == 0) {
                         // Continuă în GUI
-                        startGUI();
+                        startGUI(userType);
                     } else if (response == 1) {
                         // Continuă în CLI
-                        startCLI();
+                        startCLI(userType);
                     }
                 } else {
                     JOptionPane.showMessageDialog(null, "Username sau parolă incorectă!");
@@ -68,7 +69,7 @@ public class LoginFrame extends JFrame {
     }
 
     // Metodă pentru inițializarea GUI
-    private void startGUI() {
+    private void startGUI(String userType) {
         // Cod pentru inițializarea interfeței grafice
         JOptionPane.showMessageDialog(null, "Bun venit în GUI!");
         // Ascunde sau închide fereastra de login
@@ -78,14 +79,14 @@ public class LoginFrame extends JFrame {
         // Creează și afișează fereastra principală
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
-                MainPage mainPage = new MainPage();
+                MainPage mainPage = new MainPage(userType);
                 mainPage.setVisible(true);
             }
         });
     }
 
     // Metodă pentru inițializarea CLI
-    private void startCLI() {
+    private void startCLI(String userType) {
         // Cod pentru inițializarea CLI
         JOptionPane.showMessageDialog(null, "Continuă în CLI!");
     }

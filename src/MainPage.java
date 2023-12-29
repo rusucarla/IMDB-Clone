@@ -1,11 +1,17 @@
 import javax.swing.*;
-import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.List;
 
 public class MainPage extends JFrame {
-    // Constructor
-    public MainPage() {
+    private IMDB imdb = IMDB.getInstance(); // O instanță a clasei IMDB pentru a accesa datele
+    private JTable productionsTable;
+    private ProductionTableModel tableModel;
+    private String userAccountType;
+
+    public MainPage(String userAccountType) {
+        this.userAccountType = userAccountType;
         initUI();
     }
 
@@ -21,111 +27,131 @@ public class MainPage extends JFrame {
         // Adaugă bara de meniu
         setJMenuBar(createMenuBar());
 
-        // Adaugă componentele UI
-        add(createSearchPanel(), BorderLayout.NORTH);
+        // Adaugă panoul cu filtre și conținutul central
         add(createFilterPanel(), BorderLayout.WEST);
         add(createContentPanel(), BorderLayout.CENTER);
     }
+
 
     private JMenuBar createMenuBar() {
         JMenuBar menuBar = new JMenuBar();
 
         // Meniu File
-        JMenu fileMenu = new JMenu("File");
-        JMenuItem exitItem = new JMenuItem("Exit");
-        exitItem.addActionListener((event) -> System.exit(0));
-        fileMenu.add(exitItem);
+        JMenu fileMenu = new JMenu("Get Out");
+        JMenuItem logoutItem = new JMenuItem("Logout");
+        logoutItem.addActionListener((event) -> {
+            // Logică de delogare
+            System.exit(0); // sau arată din nou fereastra de login
+        });
+        fileMenu.add(logoutItem);
+
+        // Meniu Navigare
+        JMenu navigateMenu = new JMenu("Navigate");
+        JMenuItem actorsPageItem = new JMenuItem("Actors Page");
+        actorsPageItem.addActionListener((event) -> {
+            // Logică pentru a deschide pagina actorilor
+            openActorsPage();
+        });
+        navigateMenu.add(actorsPageItem);
 
         menuBar.add(fileMenu);
-
+        menuBar.add(navigateMenu);
         // Adaugă alte meniuri după necesitate
 
         return menuBar;
     }
 
-    private JPanel createSearchPanel() {
-        JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        JLabel label = new JLabel("Caută film/serial/actor:");
-        JTextField searchField = new JTextField(20);
-        JButton searchButton = new JButton("Caută");
-        panel.add(label);
-        panel.add(searchField);
-        panel.add(searchButton);
-
-        // Adaugă funcționalitatea pentru butonul de căutare
-
-        return panel;
+    private void openActorsPage() {
+        ActorsPage actorsPage = new ActorsPage(userAccountType);
+        actorsPage.setVisible(true);
     }
 
     private JPanel createFilterPanel() {
-        JPanel panel = new JPanel();
-        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
-        panel.setBorder(BorderFactory.createTitledBorder("Filtre"));
+        JPanel filterPanel = new JPanel(new GridBagLayout());
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.gridwidth = GridBagConstraints.REMAINDER;  // Componentele se termină la sfârșitul rândului
+        gbc.anchor = GridBagConstraints.CENTER;  // Ancorează componentele în centrul spațiului lor
+        gbc.insets = new Insets(5, 0, 5, 0);  // Adaugă un spațiu vertical între componente
+        // Adaugă filtre (gen, rating etc.)
+        filterPanel.add(new JLabel("Filtru dupa Gen:"), gbc);
+        JComboBox<Genre> genreComboBox = new JComboBox<>(Genre.values());
+//        genreComboBox.setMaximumSize(new Dimension(150, 20));
+        filterPanel.add(genreComboBox, gbc);
+        filterPanel.add(new JLabel("Filtru dupa Regizor:"), gbc);
+        JComboBox<String> directorComboBox = new JComboBox<>(new String[]{"Orice Regizor", "Quentin Tarantino", "Nolan", "Spielberg", "Scorsese"});
+        filterPanel.add(directorComboBox, gbc);
+//        filterPanel.add(Box.createRigidArea(new Dimension(0, 5)));
+        JTextField ratingField = new JTextField(5);
+        ratingField.setMaximumSize(new Dimension(50, 20));
+        filterPanel.add(new JLabel("Rating minim:"), gbc);
+        filterPanel.add(ratingField, gbc);
+        filterPanel.add(Box.createRigidArea(new Dimension(0, 5)));
+        JButton applyFiltersButton = new JButton("Aplică Filtrele");
+        filterPanel.add(applyFiltersButton, gbc);
 
-        // Adaugă opțiuni de filtrare (gen, rating etc.)
-        JCheckBox actionCheckBox = new JCheckBox("Action");
-        // Adaugă alte checkbox-uri sau componente pentru filtre
-
-        panel.add(actionCheckBox);
-        // Adaugă alte filtre
-
-        return panel;
+        // Adaugă listener pentru butonul de filtrare
+        applyFiltersButton.addActionListener(e -> {
+            List<Production> filteredProductions = imdb.getProductionList();
+            System.out.println(filteredProductions.size());
+        });
+        filterPanel.add(Box.createVerticalGlue()); // Adaugă un spațiu gol pentru a poziționa butonul în partea de jos
+        return filterPanel;
     }
+
 
     private JPanel createContentPanel() {
-        JPanel panel = new JPanel(new BorderLayout());
+        JPanel contentPanel = new JPanel(new BorderLayout());
+        contentPanel.add(new JLabel("Conținut Recomandat"), BorderLayout.NORTH);
 
-        // Panel pentru filtre
-        JPanel filtersPanel = new JPanel();
-        JComboBox<String> genreComboBox = new JComboBox<>(new String[]{"Toate", "Action", "Drama", "Comedy"});
-        JTextField ratingField = new JTextField(5);
-        JButton filterButton = new JButton("Filtrează");
-        filtersPanel.add(new JLabel("Gen:"));
-        filtersPanel.add(genreComboBox);
-        filtersPanel.add(new JLabel("Rating minim:"));
-        filtersPanel.add(ratingField);
-        filtersPanel.add(filterButton);
+        // Inițializează tabelul cu producții
+        resetTableModel();
+        productionsTable = new JTable(tableModel);
+        contentPanel.add(new JScrollPane(productionsTable), BorderLayout.CENTER);
 
-        // Tabel pentru afișarea producțiilor
-        String[] columnNames = {"Titlu", "Gen", "Rating"};
-        JTable table = new JTable(new DefaultTableModel(columnNames, 0));
-        JScrollPane scrollPane = new JScrollPane(table);
-        panel.add(filtersPanel, BorderLayout.NORTH);
-        panel.add(scrollPane, BorderLayout.CENTER);
-
-        // Adaugă funcționalitatea butonului de filtrare
-        filterButton.addActionListener(e -> {
-            String selectedGenre = (String) genreComboBox.getSelectedItem();
-            double minRating = Double.parseDouble(ratingField.getText());
-            List<Production> filteredProductions = IMDB.getInstance().getProductionList(); // Începe cu toate producțiile
-
-//            // Aplică filtrul de gen
-//            if (selectedGenre != null && !selectedGenre.equals("Toate")) {
-//                filteredProductions = IMDB.getInstance().filterByGenre(selectedGenre);
-//            }
-
-            // Aplică filtrul de rating
-            filteredProductions = IMDB.getInstance().filterByRating(minRating);
-
-            // Actualizează tabelul cu producțiile filtrate
-            updateTableWithProductions(table, filteredProductions);
+        // Listener pentru dublu-clic pe tabel
+        productionsTable.addMouseListener(new MouseAdapter() {
+            public void mouseClicked(MouseEvent e) {
+                if (e.getClickCount() == 2) {
+                    int selectedRow = productionsTable.getSelectedRow();
+                    if (selectedRow >= 0) {
+                        Production selectedProduction = tableModel.getProductionAt(selectedRow);
+                        openProductionDetails(selectedProduction);
+                    }
+                }
+            }
         });
 
-        // Încarcă și afișează toate producțiile la început
-        updateTableWithProductions(table, IMDB.getInstance().getProductionList());
-
-        return panel;
+        return contentPanel;
     }
 
-    // Metodă pentru actualizarea tabelului cu o listă de producții
-    private void updateTableWithProductions(JTable table, List<Production> productions) {
-        DefaultTableModel model = (DefaultTableModel) table.getModel();
-        model.setRowCount(0); // Curăță tabelul existent
-        for (Production p : productions) {
-            model.addRow(new Object[]{p.getTitlu(), p.getGenreList(), p.getNotaFilm()});
-        }
+    private void resetTableModel() {
+        tableModel = new ProductionTableModel(imdb.getProductionList());
     }
 
-    // Metode suplimentare pentru gestionarea evenimentelor și actualizarea UI
-    // ...
+    private void openProductionDetails(Production production) {
+        // Crează și afișează o nouă fereastră sau un dialog cu detaliile producției
+        JDialog detailsDialog = new JDialog(this, "Detalii Producție", true);
+        detailsDialog.setSize(400, 300);
+        detailsDialog.setLayout(new BorderLayout());
+
+        // Formatează textul folosind HTML
+        JLabel detailsLabel = new JLabel("<html><b>Titlu:</b> " + production.getTitlu() + "<br><b>Gen:</b> " + production.getGenreList() + "<br><b>Rating:</b> " + production.getNotaFilm() + "</html>");
+        JScrollPane scrollPane = new JScrollPane(detailsLabel);  // Folosește JScrollPane pentru a gestiona textul lung
+        detailsDialog.add(scrollPane, BorderLayout.CENTER);
+
+        // Adaugă informații despre producție în dialog
+//        detailsDialog.add(new JLabel("Titlu: " + production.getTitlu()), BorderLayout.NORTH);
+//        detailsDialog.add(new JLabel("Gen: " + production.getGenreList()), BorderLayout.CENTER);
+//        detailsDialog.add(new JLabel("Rating: " + production.getNotaFilm()), BorderLayout.SOUTH);
+
+        // Adaugă un buton pentru închidere
+        JButton closeButton = new JButton("Inchide");
+        closeButton.addActionListener(e -> detailsDialog.dispose());
+        detailsDialog.add(closeButton, BorderLayout.PAGE_END);
+
+        // Afișează dialogul
+        detailsDialog.setLocationRelativeTo(this);
+        detailsDialog.setVisible(true);
+    }
+
 }

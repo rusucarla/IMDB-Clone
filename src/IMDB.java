@@ -128,16 +128,16 @@ public class IMDB {
                 JSONObject informationObject = (JSONObject) userObject.get("information");
                 JSONObject credentialsObject = (JSONObject) informationObject.get("credentials");
                 String email = (String) credentialsObject.get("email");
-                System.out.println("EMAIL: " + email);
+//                System.out.println("EMAIL: " + email);
                 String password = (String) credentialsObject.get("password");
-                System.out.println("PASSWORD: " + password);
+//                System.out.println("PASSWORD: " + password);
                 Credentials credentials = new Credentials(email, password);
                 String name = (String) informationObject.get("name");
-                System.out.println(name);
+//                System.out.println(name);
                 String country = (String) informationObject.get("country");
-                System.out.println("COUNTRY: " + country);
+//                System.out.println("COUNTRY: " + country);
                 String gender = (String) informationObject.get("gender");
-                System.out.println("GENDER: " + gender);
+//                System.out.println("GENDER: " + gender);
 
 //                LocalDateTime birthDate = LocalDateTime.parse((String) userObject.get("birthDate"));
                 String birthDateStr = (String) informationObject.get("birthDate");
@@ -146,7 +146,7 @@ public class IMDB {
                 DateTimeFormatter customFormatter = DateTimeFormatter.ofPattern(pattern);
                 if (birthDateStr != null) {
                     birthDate = LocalDate.parse(birthDateStr, customFormatter);
-                    System.out.println("BIRTHDATE: " + birthDate);
+//                    System.out.println("BIRTHDATE: " + birthDate);
                 }
 //                Integer age = ((Long) userObject.get("age")).intValue();
                 Object ageObj = informationObject.get("age");
@@ -281,16 +281,53 @@ public class IMDB {
         }
         return false;
     }
+    // verificare tip de user
+    public String checkUserType(String username){
+        for(User user : userList){
+            if(user.getUserName().equals(username)){
+                return user.getUserType().toString();
+            }
+        }
+        return null;
+    }
     // getter pentru lista de producții
     public List<Production> getProductionList() {
-        return productionList;
+        return this.productionList;
+    }
+    // getter pentru lista de actori
+    public List<Actor> getActorList() {
+        return this.actorList;
     }
     // filtre pentru producții
     // filtru pentru an
-    public List<Production> filterByRating(double minRating) {
+    public List<Production> filterByRating(double minRating, List<Production> productionList) {
         return productionList.stream()
                 .filter(p -> p.getNotaFilm() >= minRating)
                 .collect(Collectors.toList());
+    }
+    // filtru pentru gen
+    public List<Production> filterByGenre(String genre, List<Production> productionList) {
+        return productionList.stream()
+                .filter(p -> p.getGenreList().contains(genre))
+                .collect(Collectors.toList());
+    }
+    // filtru dupa regizor
+    public List<Production> filterByDirector(String director, List<Production> productionList) {
+        return productionList.stream()
+                .filter(p -> {
+                    for (String directorName : p.getRegizoriList()) {
+                        if (extractLastName(directorName).equalsIgnoreCase(director)) {
+                            return true; // Regizorul se potrivește cu numele de familie dat
+                        }
+                    }
+                    return false;  // Niciun regizor nu se potrivește
+                })
+                .collect(Collectors.toList());
+    }
+
+    private String extractLastName(String directorName) {
+        String[] names = directorName.split(" ");
+        return names[names.length - 1];
     }
 
 }
