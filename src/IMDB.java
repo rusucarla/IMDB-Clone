@@ -298,6 +298,15 @@ public class IMDB {
     public List<Actor> getActorList() {
         return this.actorList;
     }
+    // getter pentru anumit user dupa username
+    public User getUser(String username) {
+        for (User user : userList) {
+            if (user.getUserName().equals(username)) {
+                return user;
+            }
+        }
+        return null;
+    }
     // filtre pentru producții
     // filtru pentru an
     public List<Production> filterByRating(double minRating, List<Production> productionList) {
@@ -330,4 +339,24 @@ public class IMDB {
         return names[names.length - 1];
     }
 
+    public List<Production> filterByTitle(String searchText, List<Production> filteredProductions) {
+        return filteredProductions.stream()
+                .filter(p -> p.getTitlu().toLowerCase().contains(searchText.toLowerCase()))
+                .collect(Collectors.toList());
+    }
+
+    public boolean checkActor(String name) {
+        for (Actor actor : actorList) {
+            if (actor.getName().equals(name)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public void modifyActor(Actor selectedActor, Actor actor) {
+        selectedActor.setName(actor.getName());
+        selectedActor.setBiography(actor.getBiography());
+        selectedActor.setPerformances(actor.getPerformances());
+    }
 }

@@ -46,7 +46,6 @@ public class LoginFrame extends JFrame {
                 // Verifică corectitudinea parolei
                 String user = userText.getText();
                 String password = new String(passwordText.getPassword());
-                String userType = imdb.checkUserType(user);
                 if (imdb.checkLogin(user, password)) {
                     // Continuă în funcție de alegerea utilizatorului
                     String[] options = {"GUI", "CLI"};
@@ -56,10 +55,10 @@ public class LoginFrame extends JFrame {
 
                     if (response == 0) {
                         // Continuă în GUI
-                        startGUI(userType);
+                        startGUI(user);
                     } else if (response == 1) {
                         // Continuă în CLI
-                        startCLI(userType);
+                        startCLI(user);
                     }
                 } else {
                     JOptionPane.showMessageDialog(null, "Username sau parolă incorectă!");

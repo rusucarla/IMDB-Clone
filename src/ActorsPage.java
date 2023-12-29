@@ -43,7 +43,7 @@ public class ActorsPage extends JFrame {
     private List<String> getSortedActorNames() {
         // Implementează logica pentru a obține și sorta numele actorilor
         List<Actor> actors = imdb.getActorList();
-        List<String> actorNames = new java.util.ArrayList<>(actors.stream().map(Actor::getName).toList());
+        List<String> actorNames = actors.stream().map(Actor::getName).toList();
         Collections.sort(actorNames);
         return actorNames;
     }
@@ -59,6 +59,6 @@ public class ActorsPage extends JFrame {
         // butonul de inchidere
         JButton closeButton = new JButton("Close");
         closeButton.addActionListener(e -> actorDetailsDialog.dispose());
-        actorDetailsDialog.add(closeButton, BorderLayout.PAGE_END);
+        actorDetailsDialog.add(closeButton, BorderLayout.SOUTH);
     }
 }
