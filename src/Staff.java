@@ -51,6 +51,15 @@ public class Staff extends User implements StaffInterface {
     public void addActorSystem(Actor a) {
         actorsContribution.add(a);
         imdb.getActorList().add(a);
+        // vreau sa adaug actorul si in toate producitiile in care a jucat
+        for (Production p : imdb.getProductionList()) {
+            // caut in lista de producitiile in care a jucat
+            for (Actor.Performance performance : a.getPerformances()) {
+                if (p.getTitlu().equals(performance.getTitle())) {
+                    p.getActoriList().add(a.getName());
+                }
+            }
+        }
     }
 
     private boolean isProductionMine(Production p) {
@@ -60,9 +69,11 @@ public class Staff extends User implements StaffInterface {
     private boolean isActorMine(Actor a) {
         return actorsContribution.contains(a);
     }
+
     private boolean isProductionInImdb(Production p) {
         return imdb.getProductionList().contains(p);
     }
+
     private boolean isActorInImdb(Actor a) {
         return imdb.getActorList().contains(a);
     }
@@ -85,6 +96,36 @@ public class Staff extends User implements StaffInterface {
                 break;
             }
         }
+        // trebuie sa verific si ce tip de productie este si sa sterg si din lista de seriale/ filme
+        // daca se afla in lista de seriale/ filme
+        Iterator<Series> iterator3 = imdb.getSeriesList().iterator();
+        while (iterator3.hasNext()) {
+            Series s = iterator3.next();
+            if (s.getTitlu().equals(name)) {
+                iterator3.remove();
+                break;
+            }
+        }
+        Iterator<Movie> iterator4 = imdb.getMoviesList().iterator();
+        while (iterator4.hasNext()) {
+            Movie m = iterator4.next();
+            if (m.getTitlu().equals(name)) {
+                iterator4.remove();
+                break;
+            }
+        }
+        // trebuie sa sterg si din toate listele de producitiile preferate ale userilor
+        for (User u : imdb.getUserList()) {
+            TreeSet<Production> producitiPreferate = u.getFavoriteProductions();
+            Iterator<Production> iterator2 = producitiPreferate.iterator();
+            while (iterator2.hasNext()) {
+                Production production = iterator2.next();
+                if (production.getTitlu().equals(name)) {
+                    iterator2.remove();
+                    break;
+                }
+            }
+        }
     }
 
     @Override
@@ -98,20 +139,43 @@ public class Staff extends User implements StaffInterface {
             }
         }
         Iterator<Actor> iterator1 = imdb.getActorList().iterator();
+//        System.out.println("Sutn initial " + imdb.getActorList().size() + " actori");
         while (iterator1.hasNext()) {
             Actor a = iterator1.next();
             if (a.getName().equals(name)) {
+//                System.out.println("AICI " + a.getName());
                 iterator1.remove();
+//                System.out.println("Au mai ramas " + imdb.getActorList().size() + " actori");
                 break;
             }
+        }
+        // trebuie sa sterg si din toate listele de actori preferati ai userilor
+        for (User u : imdb.getUserList()) {
+            TreeSet<Actor> actoriPreferati = u.getFavoriteActors();
+            Iterator<Actor> iterator2 = actoriPreferati.iterator();
+            while (iterator2.hasNext()) {
+                Actor actor = iterator2.next();
+                if (actor.getName().equals(name)) {
+                    iterator2.remove();
+                    break;
+                }
+            }
+        }
+        // trebuie sa merg prin lista cu toate producitiile si sa sterg actorul din lista de actori
+        // daca se afla in lista de actori
+        for (Production p : imdb.getProductionList()) {
+            // actorList este in Production
+            p.getActoriList().removeIf(actor -> actor.equals(name));
         }
     }
 
     @Override
-    public void updateProduction(Production p) {
-        for (Production new_p : productionsContribution) {
-            if (new_p.getTitlu().equals(p.getTitlu())) {
+    public void updateProduction(Production new_p) {
+        for (Production p : productionsContribution) {
+            if (p.getTitlu().equals(new_p.getTitlu())) {
                 if (isProductionMine(p)) {
+                    System.out.println("AICI INAINTE");
+                    p.displayInfo();
                     p.setActoriList(new_p.getActoriList());
                     p.setDescriereFilm(new_p.getDescriereFilm());
                     p.setGenreList(new_p.getGenreList());
@@ -119,13 +183,15 @@ public class Staff extends User implements StaffInterface {
                     p.setTitlu(new_p.getTitlu());
                     p.setRegizoriList(new_p.getRegizoriList());
                     p.setRatingList(new_p.getRatingList());
+                    System.out.println("AICI DUPA");
+                    p.displayInfo();
                     break;
                 } else {
                     System.out.println("Nu aveti permisiuni sa updatati");
                 }
             }
         }
-        for (Production new_p : imdb.getProductionList()) {
+        for (Production p : imdb.getProductionList()) {
             if (new_p.getTitlu().equals(p.getTitlu())) {
                 if (isProductionMine(p)) {
                     new_p.setActoriList(p.getActoriList());

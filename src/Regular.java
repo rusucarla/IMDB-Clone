@@ -53,4 +53,8 @@ public class Regular extends User implements RequestManager {
             System.out.println(production.getTitlu());
         }
     }
+
+    public void remove_rating() {
+        this.userRatings.removeLast();
+    }
 }

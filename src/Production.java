@@ -110,11 +110,26 @@ public abstract class Production implements Comparable<Production> {
         return descriereFilm;
     }
 
-    public abstract void displayInfo();
+    public abstract void displayInfo(
+    );
 
     @Override
     public int compareTo(Production o) {
         return this.titlu.compareTo(o.titlu);
     }
 
+    public void addRating(Rating rating) {
+        this.ratingList.add(rating);
+        calculNota();
+    }
+
+    public void removeRating(String username) {
+        for (Rating rating : ratingList) {
+            if (rating.getUsernameRater().equals(username)) {
+                ratingList.remove(rating);
+                calculNota();
+                break;
+            }
+        }
+    }
 }

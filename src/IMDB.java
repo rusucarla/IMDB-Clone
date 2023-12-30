@@ -91,7 +91,7 @@ public class IMDB {
                     seriesList.add((Series) production);
                 }
             }
-            // afiseaza lista de filme
+//             afiseaza lista de filme
 //            System.out.println("Movies:");
 //            for (Movie movie : moviesList) {
 //                movie.displayInfo();
@@ -100,6 +100,24 @@ public class IMDB {
 //            System.out.println("Series:");
 //            for (Series series : seriesList) {
 //                series.displayInfo();
+//            }
+//            System.out.println("Productions:");
+//            for (Production production : productionList) {
+//                System.out.println("Title: " + production.getTitlu());
+//                System.out.println("Actors:");
+//                for (String actor : production.getActoriList()) {
+//                    System.out.println("  Name: " + actor);
+//                }
+//                System.out.println("Directors:");
+//                for (String director : production.getRegizoriList()) {
+//                    System.out.println("  Name: " + director);
+//                }
+//                System.out.println("Genres:");
+//                for (String genre : production.getGenreList()) {
+//                    System.out.println("  Name: " + genre);
+//                }
+//                System.out.println("Description: " + production.getDescriereFilm());
+//                System.out.println("Rating: " + production.getNotaFilm());
 //            }
         } catch (Exception e) {
             e.printStackTrace();
@@ -307,6 +325,10 @@ public class IMDB {
         }
         return null;
     }
+    // getter pentru lista de useri
+    public List<User> getUserList() {
+        return this.userList;
+    }
     // filtre pentru producții
     // filtru pentru an
     public List<Production> filterByRating(double minRating, List<Production> productionList) {
@@ -358,5 +380,20 @@ public class IMDB {
         selectedActor.setName(actor.getName());
         selectedActor.setBiography(actor.getBiography());
         selectedActor.setPerformances(actor.getPerformances());
+    }
+
+    // getter pentru lista de filme
+    public List<Movie> getMoviesList() {
+        return this.moviesList;
+    }
+    // getter pentru lista de seriale
+    public List<Series> getSeriesList() {
+        return this.seriesList;
+    }
+
+    public List<Actor> filterByActor(String searchText, List<Actor> filteredActors) {
+        return filteredActors.stream()
+                .filter(a -> a.getName().toLowerCase().contains(searchText.toLowerCase()))
+                .collect(Collectors.toList());
     }
 }
