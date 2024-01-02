@@ -57,4 +57,9 @@ public class Regular extends User implements RequestManager {
     public void remove_rating() {
         this.userRatings.removeLast();
     }
+
+    @Override
+    public void update(String notification) {
+        super.update(notification);
+    }
 }

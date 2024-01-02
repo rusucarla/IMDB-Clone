@@ -1,4 +1,5 @@
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 import org.json.simple.JSONArray;
@@ -8,6 +9,7 @@ import org.json.simple.parser.JSONParser;
 import java.io.File;
 import java.io.FileReader;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
@@ -291,31 +293,36 @@ public class IMDB {
             e.printStackTrace();
         }
     }
-    public boolean checkLogin(String username, String password){
-        for(User user : userList){
-            if(user.getUserName().equals(username) && user.getInformation().getUserCredentials().getPassword().equals(password)){
+
+    public boolean checkLogin(String username, String password) {
+        for (User user : userList) {
+            if (user.getUserName().equals(username) && user.getInformation().getUserCredentials().getPassword().equals(password)) {
                 return true;
             }
         }
         return false;
     }
+
     // verificare tip de user
-    public String checkUserType(String username){
-        for(User user : userList){
-            if(user.getUserName().equals(username)){
+    public String checkUserType(String username) {
+        for (User user : userList) {
+            if (user.getUserName().equals(username)) {
                 return user.getUserType().toString();
             }
         }
         return null;
     }
+
     // getter pentru lista de producții
     public List<Production> getProductionList() {
         return this.productionList;
     }
+
     // getter pentru lista de actori
     public List<Actor> getActorList() {
         return this.actorList;
     }
+
     // getter pentru anumit user dupa username
     public User getUser(String username) {
         for (User user : userList) {
@@ -325,10 +332,12 @@ public class IMDB {
         }
         return null;
     }
+
     // getter pentru lista de useri
     public List<User> getUserList() {
         return this.userList;
     }
+
     // filtre pentru producții
     // filtru pentru an
     public List<Production> filterByRating(double minRating, List<Production> productionList) {
@@ -336,12 +345,14 @@ public class IMDB {
                 .filter(p -> p.getNotaFilm() >= minRating)
                 .collect(Collectors.toList());
     }
+
     // filtru pentru gen
     public List<Production> filterByGenre(String genre, List<Production> productionList) {
         return productionList.stream()
                 .filter(p -> p.getGenreList().contains(genre))
                 .collect(Collectors.toList());
     }
+
     // filtru dupa regizor
     public List<Production> filterByDirector(String director, List<Production> productionList) {
         return productionList.stream()
@@ -386,6 +397,7 @@ public class IMDB {
     public List<Movie> getMoviesList() {
         return this.moviesList;
     }
+
     // getter pentru lista de seriale
     public List<Series> getSeriesList() {
         return this.seriesList;
@@ -395,5 +407,52 @@ public class IMDB {
         return filteredActors.stream()
                 .filter(a -> a.getName().toLowerCase().contains(searchText.toLowerCase()))
                 .collect(Collectors.toList());
+    }
+
+    public void loadRequests(String pathRequest){
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            // objectMapper nu va recunoaste campul de data, asa ca trebuie sa ii spun eu
+            // sa nu se opreasca daca nu recunoaste un camp
+            objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+
+            File requestsFile = new File(pathRequest);
+            this.requestList = objectMapper.readValue(requestsFile, new TypeReference<List<Request>>() {
+            });
+            // vreau sa extrag manual din JSON data de la request
+            // pentru ca nu pot sa o extrag cu objectMapper
+            List<LocalDateTime> dataRequestList = new ArrayList<>();
+            JSONParser parser = new JSONParser();
+            JSONArray requestsArray = (JSONArray) parser.parse(new FileReader(pathRequest));
+            for (int i = 0; i < requestsArray.size(); i++) {
+                JSONObject requestObject = (JSONObject) requestsArray.get(i);
+                String data = (String) requestObject.get("createdDate");
+                // adaug data la request
+                dataRequestList.add(LocalDateTime.parse(data));
+            }
+            // adaug data la fiecare request
+            for (Request request : requestList) {
+                request.setDataCerere(dataRequestList.get(requestList.indexOf(request)));
+            }
+            // pentru fiecare request trebuie sa adaug request in lista cerui care trebuie sa rezolve
+            // si trebuie ca cel care a facut-o sa devina observer pentru request
+            for (Request request : requestList) {
+                // adaug request in lista cerui care trebuie sa rezolve
+                for (User user : userList) {
+                    if (user.getUserName().equals(request.getUsernameRezolvant())) {
+                        Staff staff = (Staff) user;
+                        staff.addRequest(request);
+                    }
+                }
+                // cel care a facut request devine observer pentru request
+                for (User user : userList) {
+                    if (user.getUserName().equals(request.getUsernameReclamant())) {
+                        request.addObserver(user);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

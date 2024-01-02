@@ -56,4 +56,14 @@ public class Movie extends Production {
             }
         }
     }
+
+    @Override
+    public void addObserver(Observer observer) {
+        super.addObserver(observer);
+    }
+
+    @Override
+    public void removeObserver(Observer observer) {
+        super.removeObserver(observer);
+    }
 }

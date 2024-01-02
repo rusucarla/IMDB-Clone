@@ -31,6 +31,7 @@ public class Staff extends User implements StaffInterface {
 
     public void setProductionsContribution(TreeSet<Production> productionsContribution) {
         this.productionsContribution = productionsContribution;
+        this.addObservers();
     }
 
     public TreeSet<Actor> getActorsContribution() {
@@ -45,6 +46,16 @@ public class Staff extends User implements StaffInterface {
     public void addProductionSystem(Production p) {
         productionsContribution.add(p);
         imdb.getProductionList().add(p);
+        p.addObserver(this);
+        // vreau sa adaug productia in lista actorilor care au jucat in ea
+        for (Actor a : imdb.getActorList()) {
+            // caut in lista de actori care au jucat in productia p
+            for (String actor : p.getActoriList()) {
+                if (a.getName().equals(actor)) {
+                    a.getPerformances().add(new Actor.Performance(p.getTitlu(), p.getTip()));
+                }
+            }
+        }
     }
 
     @Override
@@ -85,6 +96,7 @@ public class Staff extends User implements StaffInterface {
             Production p = iterator.next();
             if (p.getTitlu().equals(name)) {
                 iterator.remove();
+                p.removeObserver(this);
                 break;
             }
         }
@@ -174,7 +186,6 @@ public class Staff extends User implements StaffInterface {
         for (Production p : productionsContribution) {
             if (p.getTitlu().equals(new_p.getTitlu())) {
                 if (isProductionMine(p)) {
-                    System.out.println("AICI INAINTE");
                     p.displayInfo();
                     p.setActoriList(new_p.getActoriList());
                     p.setDescriereFilm(new_p.getDescriereFilm());
@@ -183,7 +194,6 @@ public class Staff extends User implements StaffInterface {
                     p.setTitlu(new_p.getTitlu());
                     p.setRegizoriList(new_p.getRegizoriList());
                     p.setRatingList(new_p.getRatingList());
-                    System.out.println("AICI DUPA");
                     p.displayInfo();
                     break;
                 } else {
@@ -222,14 +232,9 @@ public class Staff extends User implements StaffInterface {
                 }
             }
         }
-        System.out.println("AICI");
-        System.out.println("NAME " + new_a.getName());
         for (Actor a : imdb.getActorList()) {
-            System.out.println("NUME a " + a.getName());
             if (a.getName().equals(new_a.getName())) {
-                System.out.println("AICI2");
                 if (isActorMine(a)) {
-                    System.out.println("AICI3");
                     new_a.setBiography(a.getBiography());
                     new_a.setName(a.getName());
                     new_a.setPerformances(a.getPerformances());
@@ -243,5 +248,22 @@ public class Staff extends User implements StaffInterface {
     @Override
     public int compareTo(User o) {
         return 0;
+    }
+
+    @Override
+    public void update(String notification) {
+        super.update(notification);
+    }
+    public void addObservers() {
+        if (productionsContribution == null) {
+            return;
+        }
+        for (Production p : productionsContribution) {
+            p.addObserver(this);
+        }
+    }
+
+    public void addRequest(Request request) {
+        requestList.add(request);
     }
 }

@@ -2,6 +2,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -10,7 +11,7 @@ import java.util.List;
         @JsonSubTypes.Type(value = Movie.class, name = "Movie"),
         @JsonSubTypes.Type(value = Series.class, name = "Series")
 })
-public abstract class Production implements Comparable<Production> {
+public abstract class Production implements Comparable<Production>, Subject {
     @JsonProperty("title")
     protected String titlu;
     @JsonProperty("directors")
@@ -25,6 +26,7 @@ public abstract class Production implements Comparable<Production> {
     protected String descriereFilm;
     @JsonProperty("averageRating")
     protected double notaFilm;
+    private List<Observer> observers = new ArrayList<>();
 
     // constructor
     public Production(String titlu, List<String> regizori, List<String> actori,
@@ -121,6 +123,29 @@ public abstract class Production implements Comparable<Production> {
     public void addRating(Rating rating) {
         this.ratingList.add(rating);
         calculNota();
+        // vreau sa notific userii care au adaugat acest film la favorite
+        // si user-ul care a adaugat productia in sistem
+        String notification = "New rating for " + this.titlu + " from " + rating.getUsernameRater() +
+                " with " + rating.getNotaRating() + " points" + " and comment: " + rating.getComentariiRater();
+        System.out.println("New rating");
+        notifyAllObservers(notification);
+    }
+
+    public void notifyAllObservers(String notification) {
+        System.out.println("Notifying all observers");
+        System.out.println("Number of observers: " + observers.size());
+        for (Observer observer : observers) {
+            System.out.println("Observer " + observer);
+            observer.update(notification);
+        }
+    }
+    public void addObserver(Observer observer) {
+        System.out.println("Adding observer " + observer);
+        observers.add(observer);
+    }
+    public void removeObserver(Observer observer) {
+        System.out.println("Removing observer " + observer);
+        observers.remove(observer);
     }
 
     public void removeRating(String username) {
@@ -130,6 +155,14 @@ public abstract class Production implements Comparable<Production> {
                 calculNota();
                 break;
             }
+        }
+    }
+
+    public String getTip() {
+        if (this instanceof Movie) {
+            return "Movie";
+        } else {
+            return "Series";
         }
     }
 }

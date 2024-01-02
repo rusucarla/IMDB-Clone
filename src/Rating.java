@@ -1,6 +1,9 @@
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class Rating {
+import java.util.ArrayList;
+import java.util.List;
+
+public class Rating implements Subject {
     @JsonProperty("username")
     String usernameRater;
 
@@ -9,6 +12,8 @@ public class Rating {
 
     @JsonProperty("comment")
     String comentariiRater;
+
+    List<Observer> observers = new ArrayList<>();
 
     public Rating(String username, int nota, String comentarii){
         this.comentariiRater = comentarii;
@@ -43,5 +48,22 @@ public class Rating {
     }
     private int validareNota(int notaRating){
         return Math.max(1, Math.min(10, notaRating));
+    }
+
+    @Override
+    public void addObserver(Observer observer) {
+        this.observers.add(observer);
+    }
+
+    @Override
+    public void removeObserver(Observer observer) {
+        this.observers.remove(observer);
+    }
+
+    @Override
+    public void notifyAllObservers(String notification) {
+        for (Observer observer : observers) {
+            observer.update(notification);
+        }
     }
 }

@@ -5,13 +5,14 @@ import java.util.Random;
 import java.util.TreeSet;
 
 
-public abstract class User implements Comparable<User> {
+public abstract class User implements Comparable<User>, Observer {
     public TreeSet<Actor> favoriteActors;
     public TreeSet<Production> favoriteProductions;
     private Information information;
     private AccountType userType;
     private String username;
     private int experience;
+    private ExperienceStrategy experienceStrategy;
     private List<String> notifications;
 
     public User(Information info, AccountType cont, String username,
@@ -23,6 +24,7 @@ public abstract class User implements Comparable<User> {
         this.notifications = new ArrayList<>();
         this.favoriteActors = new TreeSet<>();
         this.favoriteProductions = new TreeSet<>();
+        addObservers();
     }
 
     public User() {
@@ -83,6 +85,7 @@ public abstract class User implements Comparable<User> {
 
     public void setFavoriteProductions(TreeSet<Production> new_favoriteProductions) {
         this.favoriteProductions = new_favoriteProductions;
+        this.addObservers();
     }
 
     //    public void add_favorite_movie(Movie new_movie) {
@@ -94,6 +97,9 @@ public abstract class User implements Comparable<User> {
 //    }
     public void add_favorite_production(Production new_production) {
         this.favoriteProductions.add(new_production);
+        System.out.println("New favorite production: " + new_production.getTitlu());
+        // trebuie sa devina observer pentru aceasta productie
+        new_production.addObserver(this);
     }
 
     public void add_favorite_actor(Actor new_actor) {
@@ -109,6 +115,7 @@ public abstract class User implements Comparable<User> {
 //    }
     public void remove_favorite_production(Production removed_production) {
         this.favoriteProductions.remove(removed_production);
+        removed_production.removeObserver(this);
     }
 
     public void remove_favorite_actor(Actor removed_actor) {
@@ -117,6 +124,29 @@ public abstract class User implements Comparable<User> {
 
     public void add_exp(int added_exp) {
         this.experience += added_exp;
+    }
+    public void setExperienceStrategy(ExperienceStrategy experienceStrategy) {
+        this.experienceStrategy = experienceStrategy;
+    }
+    public void updateExperience() {
+        if (experienceStrategy != null) {
+            experience += experienceStrategy.calculateExperience();
+        }
+    }
+    public void update(String notification) {
+        this.notifications.add(notification);
+        System.out.println("Notification for " + this.username + ": " + notification);
+    }
+    // metoda pentru a adauga observer la toate productiile din lista de favorite
+    public void addObservers() {
+        if (this instanceof Contributor || this instanceof Admin) {
+            Staff staff = (Staff) this;
+            staff.addObservers();
+        } else {
+            for (Production production : this.favoriteProductions) {
+                production.addObserver(this);
+            }
+        }
     }
 
     public static class Information {

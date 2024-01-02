@@ -71,4 +71,19 @@ public class Series extends Production {
             }
         }
     }
+
+    @Override
+    public void addObserver(Observer observer) {
+
+    }
+
+    @Override
+    public void removeObserver(Observer observer) {
+
+    }
+
+    @Override
+    public void notifyAllObservers(String notification) {
+
+    }
 }
