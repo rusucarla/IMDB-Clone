@@ -13,6 +13,11 @@ public class Actor implements Comparable<Actor>{
         this.biography = biography;
     }
 
+    @Override
+    public String toString() {
+        return this.getName();
+    }
+
     // Getter methods
     public String getName() {
         return name;

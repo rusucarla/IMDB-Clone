@@ -2,6 +2,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.*;
 
@@ -14,6 +15,9 @@ public class MainPage extends JFrame {
     private JPanel cardPanel;
     private DefaultListModel<Production> productionListModel;
     private DefaultListModel<Actor> actorListModel;
+    private DefaultListModel<User> userListModel;
+    private JPanel requestsPanel = new JPanel();
+    private JPanel myrequestsPanel = new JPanel();
 
     public MainPage(String username) {
         this.username = username;
@@ -66,12 +70,546 @@ public class MainPage extends JFrame {
             // adaugare producție
             JPanel addProductionPagePanel = createAddProductionPagePanel(username, userAccountType);
             cardPanel.add(addProductionPagePanel, "addProduction");
+            // requests page
+            JPanel requestsPagePanel = createRequestsPagePanel(username, userAccountType);
+            cardPanel.add(requestsPagePanel, "requests");
         }
+        // doar pentru utilizatorii admin am nevoie sa aiba acces la toti userii
+        if (user.getUserType() == AccountType.ADMIN) {
+            // users page
+            JPanel usersPagePanel = createUsersPagePanel(username, userAccountType);
+            cardPanel.add(usersPagePanel, "users");
+            // create user page
+            JPanel createUserPagePanel = createAddUserPagePanel(username, userAccountType);
+            cardPanel.add(createUserPagePanel, "createUser");
+        }
+
+        // vreau ca toti userii sa aiba posibilitatea sa faca request-uri
+        JPanel requestPagePanel = createRequestPagePanel(username, userAccountType);
+        cardPanel.add(requestPagePanel, "request");
+        // vreau ca totii userii sa vada ce request-uri au facut
+        JPanel myRequestsPagePanel = createMyRequestsPagePanel(username, userAccountType);
+        cardPanel.add(myRequestsPagePanel, "myRequests");
         // vreau pentru toti userii sa pot vedea informatii despre propriul cont
         JPanel accountPagePanel = createAccountPagePanel(username, userAccountType);
         cardPanel.add(accountPagePanel, "account");
 
         add(cardPanel, BorderLayout.CENTER);
+    }
+
+    private JPanel createAddUserPagePanel(String username, String userAccountType) {
+        // am nevoie de un panel cu toate campurile necesare pentru a crea un user
+        // username-ul si password vor fi generate automat
+        // am nevoie de un camp pentru email
+        JPanel addUserPagePanel = new JPanel(new BorderLayout());
+        JPanel addUserPanel = new JPanel(new GridLayout(0, 1));
+        JTextField emailField = new JTextField();
+        addUserPanel.add(new JLabel("Email: "));
+        addUserPanel.add(emailField);
+        JTextField numeField = new JTextField();
+        addUserPanel.add(new JLabel("Nume: "));
+        addUserPanel.add(numeField);
+        JTextField birthDateField = new JTextField();
+        addUserPanel.add(new JLabel("Data nasterii: "));
+        addUserPanel.add(birthDateField);
+        JTextField countryField = new JTextField();
+        addUserPanel.add(new JLabel("Tara: "));
+        addUserPanel.add(countryField);
+        JTextField genderField = new JTextField();
+        addUserPanel.add(new JLabel("Gen: "));
+        addUserPanel.add(genderField);
+        JComboBox<AccountType> accountTypeComboBox = new JComboBox<>(AccountType.values());
+        addUserPanel.add(new JLabel("Tip cont: "));
+        addUserPanel.add(accountTypeComboBox);
+        JScrollPane scrollPane = new JScrollPane(addUserPanel);
+        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+        addUserPagePanel.add(scrollPane, BorderLayout.NORTH);
+        // vreau un buton pentru a crea user-ul
+        JButton createButton = new JButton("Creeaza");
+        // adaug un listener pentru butonul de create
+        addUserPagePanel.add(createButton, BorderLayout.SOUTH);
+        createButton.addActionListener(e -> {
+            String email = emailField.getText();
+            String nume = numeField.getText();
+            String birthDate = birthDateField.getText();
+            String country = countryField.getText();
+            String gender = genderField.getText();
+            AccountType accountType = (AccountType) accountTypeComboBox.getSelectedItem();
+            // verific sa nu fie vreun camp gol
+            if (email.isEmpty() || nume.isEmpty() || birthDate.isEmpty() ||
+                    country.isEmpty() || gender.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Nu pot exista campuri goale!");
+                return;
+            }
+            // verific daca data nasterii este valida
+            try {
+                LocalDate.parse(birthDate);
+            } catch (Exception exception) {
+                JOptionPane.showMessageDialog(this, "Data nasterii nu este valida!");
+                return;
+            }
+            // generez username-ul si parola
+            User.Information information = new User.Information();
+            String password = PasswordGenerator.generatePassword();
+            Credentials credentials = new Credentials();
+            credentials.setEmail(email);
+            credentials.setPassword(password);
+            information.setUserCredentials(credentials);
+            information.setUserNume(nume);
+            information.setBirthDate(LocalDate.parse(birthDate));
+            information.setUserCountry(country);
+            information.setGender(gender);
+            String username1 = information.generateUsername(nume);
+            // verific daca username-ul este deja folosit
+            if (imdb.getUser(username1) != null) {
+                // daca da, atunci nu pot sa creez
+                JOptionPane.showMessageDialog(this, "Username-ul este deja folosit!");
+                // adaug un 1 la finalul username-ului
+                username1 += "1";
+                return;
+            } else {
+                // daca nu, atunci creez
+                if (accountType == AccountType.REGULAR) {
+                    Regular regular = new Regular(information, accountType, username1, 0);
+                    imdb.getUserList().add(regular);
+                } else if (accountType == AccountType.CONTRIBUTOR) {
+                    Contributor contributor = new Contributor(information, accountType, username1, 0);
+                    imdb.getUserList().add(contributor);
+                } else if (accountType == AccountType.ADMIN) {
+                    Admin admin = new Admin(information, accountType, username1, 0);
+                    imdb.getUserList().add(admin);
+                }
+                JOptionPane.showMessageDialog(this, "User-ul a fost creat cu succes!");
+            }
+
+
+        });
+        return addUserPagePanel;
+    }
+
+    private JPanel createUsersPagePanel(String username, String userAccountType) {
+        // vreau o lista cu toti userii
+        // daca apas pe un user, vreau sa pot vedea informatii despre el
+        // si sa am optiunea de a-l sterge din sistem
+        // sau de a ii modifica detaliile
+        JPanel usersPagePanel = new JPanel(new BorderLayout());
+        userListModel = new DefaultListModel<>();
+        JList<User> userList = new JList<>(userListModel);
+        userList.setCellRenderer(new DefaultListCellRenderer() {
+            @Override
+            public Component getListCellRendererComponent(JList<?> list, Object value, int index,
+                                                          boolean isSelected, boolean cellHasFocus) {
+                User user = (User) value;
+                JLabel label = (JLabel) super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+                label.setText(user.getUserName());
+                return label;
+            }
+        });
+        JButton refreshButton = new JButton("Refresh");
+        refreshButton.addActionListener(e -> {
+            userListModel.clear();
+            for (User user : imdb.getUserList()) {
+                userListModel.addElement(user);
+            }
+            userList.setModel(userListModel);
+        });
+        usersPagePanel.add(refreshButton, BorderLayout.SOUTH);
+        for (User user : imdb.getUserList()) {
+            userListModel.addElement(user);
+        }
+        JScrollPane scrollPane = new JScrollPane(userList);
+        usersPagePanel.add(scrollPane, BorderLayout.CENTER);
+        userList.addMouseListener(new MouseAdapter() {
+            public void mouseClicked(MouseEvent e) {
+                if (e.getClickCount() == 2) {
+                    // vreau sa afisez informatii despre user
+                    User selectedUser = userList.getSelectedValue();
+                    openUserDetails(selectedUser);
+                    userListModel.clear();
+                    for (User user : imdb.getUserList()) {
+                        userListModel.addElement(user);
+                    }
+                    userList.setModel(userListModel);
+                }
+            }
+        });
+        return usersPagePanel;
+
+    }
+
+    private void openUserDetails(User selectedUser) {
+        JDialog detailsDialog = new JDialog(this, "Detalii User", true);
+        detailsDialog.setLayout(new BorderLayout());
+        JPanel detailsPanel = new JPanel(new GridLayout(0, 1));
+        detailsPanel.add(new JLabel("Username: " + selectedUser.getUserName()));
+        detailsPanel.add(new JLabel("Account Type: " + selectedUser.getUserType()));
+        detailsPanel.add(new JLabel("Experience: " + selectedUser.getExperience()));
+        // vreau sa arat Information despre user
+        detailsPanel.add(new JLabel("Information: "));
+        detailsPanel.add(new JLabel("Nume: " + selectedUser.getInformation().getUserNume()));
+        detailsPanel.add(new JLabel("Email: " + selectedUser.getInformation().getUserCredentials().getEmail()));
+        detailsPanel.add(new JLabel("Data nasterii: " + selectedUser.getInformation().getBirthDate()));
+        detailsPanel.add(new JLabel("Tara: " + selectedUser.getInformation().getUserCountry()));
+        detailsPanel.add(new JLabel("Gen: " + selectedUser.getInformation().getGender()));
+
+        detailsDialog.add(detailsPanel, BorderLayout.CENTER);
+        // vreau un buton pentru a sterge user-ul
+        JButton removeButton = new JButton("Sterge");
+        // vreau un buton pentru a modifica user-ul
+        JButton modifyButton = new JButton("Modifica");
+        detailsPanel.add(removeButton);
+        detailsPanel.add(modifyButton);
+        // adaug un listener pentru butonul de remove
+        removeButton.addActionListener(e -> {
+            // daca user-ul este contributor atunci toate contributiile revin la echipa de admin
+            if (selectedUser.getUserType() == AccountType.CONTRIBUTOR) {
+                Staff staff = (Staff) selectedUser;
+                for (Actor actor : staff.getActorsContribution()) {
+                    Admin.getActorsContributionCommon().add(actor);
+                }
+                for (Production production : staff.getProductionsContribution()) {
+                    Admin.getProductionsContributionCommon().add(production);
+                }
+            }
+            // vreau sa sterg user-ul
+            imdb.getUserList().remove(selectedUser);
+            // dau mesaj ca s-a sters cu succes
+            JOptionPane.showMessageDialog(this, "User-ul a fost sters cu succes!");
+            detailsDialog.dispose();
+        });
+        // adaug un listener pentru butonul de modify
+        modifyButton.addActionListener(e -> {
+            JDialog modifyDialog = new JDialog(this, "Modifica User", true);
+            modifyDialog.setLayout(new BorderLayout());
+            JPanel modifyPanel = new JPanel(new GridLayout(0, 1));
+            JTextField usernameField = new JTextField(selectedUser.getUserName());
+            modifyPanel.add(new JLabel("Username: "));
+            modifyPanel.add(usernameField);
+            JTextField passwordField = new JTextField(selectedUser.getInformation().getUserCredentials().getPassword());
+            modifyPanel.add(new JLabel("Password: "));
+            modifyPanel.add(passwordField);
+            JTextField emailField = new JTextField(selectedUser.getInformation().getUserCredentials().getEmail());
+            modifyPanel.add(new JLabel("Email: "));
+            modifyPanel.add(emailField);
+            JTextField numeField = new JTextField(selectedUser.getInformation().getUserNume());
+            modifyPanel.add(new JLabel("Nume: "));
+            modifyPanel.add(numeField);
+            JTextField birthDateField = new JTextField(String.valueOf(selectedUser.getInformation().getBirthDate()));
+            modifyPanel.add(new JLabel("Data nasterii: "));
+            modifyPanel.add(birthDateField);
+            JTextField countryField = new JTextField(selectedUser.getInformation().getUserCountry());
+            modifyPanel.add(new JLabel("Tara: "));
+            modifyPanel.add(countryField);
+            JTextField genderField = new JTextField(selectedUser.getInformation().getGender());
+            modifyPanel.add(new JLabel("Gen: "));
+            modifyPanel.add(genderField);
+            JScrollPane scrollPane = new JScrollPane(modifyPanel);
+            scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+            modifyDialog.add(scrollPane, BorderLayout.NORTH);
+            modifyDialog.setSize(400, 400);
+            modifyDialog.setLocationRelativeTo(this);
+            modifyDialog.setModal(true);
+            JButton saveButton = new JButton("Salveaza");
+            modifyPanel.add(saveButton);
+            // adaug un listener pentru butonul de save
+            saveButton.addActionListener(e1 -> {
+                String username = usernameField.getText();
+                String password = passwordField.getText();
+                String email = emailField.getText();
+                String nume = numeField.getText();
+                String birthDate = birthDateField.getText();
+                String country = countryField.getText();
+                String gender = genderField.getText();
+                // verific daca user-ul a modificat username-ul
+                if (!username.equals(selectedUser.getUserName())) {
+                    // verific daca username-ul este deja folosit
+                    if (imdb.getUser(username) != null) {
+                        // daca da, atunci nu pot sa modific
+                        JOptionPane.showMessageDialog(this, "Username-ul este deja folosit!");
+                        return;
+                    } else {
+                        // daca nu, atunci modific
+                        selectedUser.setUserName(username);
+                    }
+                }
+                // verific daca user-ul a modificat parola
+                if (!password.equals(selectedUser.getInformation().getUserCredentials().getPassword())) {
+                    // daca da, atunci modific
+                    selectedUser.getInformation().getUserCredentials().setPassword(password);
+                }
+                // verific daca user-ul a modificat email-ul
+                if (!email.equals(selectedUser.getInformation().getUserCredentials().getEmail())) {
+                    // daca da, atunci modific
+                    selectedUser.getInformation().getUserCredentials().setEmail(email);
+                }
+                // verific daca user-ul a modificat numele
+                if (!nume.equals(selectedUser.getInformation().getUserNume())) {
+                    // daca da, atunci modific
+                    selectedUser.getInformation().setUserNume(nume);
+                }
+                // verific daca user-ul a modificat data nasterii
+                if (!birthDate.equals(String.valueOf(selectedUser.getInformation().getBirthDate()))) {
+                    // daca da, atunci modific
+                    selectedUser.getInformation().setBirthDate(LocalDate.parse(birthDate));
+                }
+                // verific daca user-ul a modificat tara
+                if (!country.equals(selectedUser.getInformation().getUserCountry())) {
+                    // daca da, atunci modific
+                    selectedUser.getInformation().setUserCountry(country);
+                    System.out.println(selectedUser.getInformation().getUserCountry());
+                }
+                // verific daca user-ul a modificat genul
+                if (!gender.equals(selectedUser.getInformation().getGender())) {
+                    selectedUser.getInformation().setGender(gender);
+                }
+                // verific sa nu fie vreun camp gol
+                if (username.isEmpty() || password.isEmpty() || nume.isEmpty()
+                        || birthDate.isEmpty() || country.isEmpty() || gender.isEmpty()) {
+                    JOptionPane.showMessageDialog(this, "Nu pot exista campuri goale!");
+                    return;
+                } else {
+                    JOptionPane.showMessageDialog(this, "User-ul a fost modificat cu succes!");
+                }
+            });
+            modifyDialog.setVisible(true);
+
+        });
+        detailsDialog.add(detailsPanel, BorderLayout.CENTER);
+        detailsDialog.setSize(400, 400);
+        detailsDialog.setLocationRelativeTo(this);
+        detailsDialog.setModal(true);
+        detailsDialog.setVisible(true);
+    }
+
+    private JPanel createMyRequestsPagePanel(String username, String userAccountType) {
+        // vreau sa am un panel cu toate cererile mele
+        // si pentru fiecare vreau sa am optiunea sa retrag cererea
+        User user = imdb.getUser(username);
+        myrequestsPanel.setLayout(new BoxLayout(myrequestsPanel, BoxLayout.Y_AXIS));
+        JPanel myRequestsPagePanel = new JPanel(new BorderLayout());
+        loadMyRequests(user);
+        JScrollPane scrollPane = new JScrollPane(myrequestsPanel);
+        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+        myRequestsPagePanel.add(scrollPane, BorderLayout.CENTER);
+        // vreau un buton pentru a face refresh la cereri
+        JButton refreshButton = new JButton("Refresh");
+        myRequestsPagePanel.add(refreshButton, BorderLayout.SOUTH);
+        // adaug un listener pentru butonul de refresh
+        refreshButton.addActionListener(e -> {
+            loadMyRequests(user);
+        });
+        return myRequestsPagePanel;
+    }
+
+    private void loadMyRequests(User user) {
+        myrequestsPanel.removeAll();
+        // vreau sa arat doar cererile facute de user-ul curent
+        List<Request> requestList = new ArrayList<>();
+        System.out.println("Username: " + user.getUserName());
+        for (Request request : imdb.getRequestList()) {
+            if (request.getUsernameReclamant().equals(user.getUserName())) {
+                System.out.println("Am gasit un request: " + request.getTipCerere());
+                requestList.add(request);
+            }
+        }
+        System.out.println("Size initial: " + requestList.size());
+        for (Request request : requestList) {
+            // pentru fiecare cerere vreau sa creez un panel
+            JPanel requestPanel = new JPanel(new GridLayout(0, 2));
+            requestPanel.add(new JLabel("Tip cerere: "));
+            requestPanel.add(new JLabel(request.getTipCerere().toString()));
+            requestPanel.add(new JLabel("Titlu: "));
+            requestPanel.add(new JLabel(request.getTitluCerere()));
+            requestPanel.add(new JLabel("Descriere: "));
+            JTextArea descriptionArea = new JTextArea(5, 20); // 5 rows, 20 columns
+            descriptionArea.setWrapStyleWord(true);
+            descriptionArea.setLineWrap(true);
+            descriptionArea.setCaretPosition(0);
+            descriptionArea.setEditable(false);
+            descriptionArea.setText(request.getDescriereCerere());
+            JScrollPane descriptionScrollPane = new JScrollPane(descriptionArea);
+            requestPanel.add(descriptionScrollPane);
+            requestPanel.add(new JLabel("Username reclamant: "));
+            requestPanel.add(new JLabel(request.getUsernameReclamant()));
+            requestPanel.add(new JLabel("Username rezolvant: "));
+            requestPanel.add(new JLabel(request.getUsernameRezolvant()));
+            // vreau sa am un buton pentru a retrage cererea
+            JButton removeButton = new JButton("Retrage");
+            requestPanel.add(removeButton);
+            // adaug un listener pentru butonul de remove
+            removeButton.addActionListener(e -> {
+                // vreau sa stiu user-ul care a retras cererea
+                User user1 = imdb.getUser(username);
+                // vreau sa retrag cererea
+                request.retrageCerere(user1);
+                // dau mesaj ca s-a retras cu succes
+                JOptionPane.showMessageDialog(this, "Cererea a fost retrasa cu succes!");
+            });
+            myrequestsPanel.add(requestPanel);
+        }
+        myrequestsPanel.revalidate();
+        myrequestsPanel.repaint();
+    }
+
+    private JPanel createRequestPagePanel(String username, String userAccountType) {
+        JPanel requestPagePanel = new JPanel(new BorderLayout());
+        JPanel requestPanel = new JPanel(new GridLayout(0, 1));
+        // am nevoie ca utilizatorul sa aleaga dintr-un dropdown tipul cererii
+        // am enumererea RequestType
+        JComboBox<RequestType> requestTypeComboBox = new JComboBox<>(RequestType.values());
+        requestPanel.add(new JLabel("Tip cerere: "));
+        requestPanel.add(requestTypeComboBox);
+        // vreau sa verific in funcie de ce tip de request a ales utilizatorul
+        // daca a ales MOVIE_ISSUE sau ACTOR_ISSUE, atunci vreau sa am un camp pentru titlu
+        // de unde sa aleaga dintre productiile din sistem sau actorii din sistem
+        // daca a ales DELETE_ACCOUNT sau OTHERS, atunci vreau sa am un camp pentru titlu
+        // vreau un buton pentru a continua cu cererea
+        JButton continueButton = new JButton("Continua");
+        requestPanel.add(continueButton);
+        // adaug un listener pentru butonul de continue
+        continueButton.addActionListener(e -> {
+            RequestType requestType = (RequestType) requestTypeComboBox.getSelectedItem();
+            System.out.println(requestType);
+            JComboBox<Actor> titleFieldA = new JComboBox<>();
+            JComboBox<Production> titleFieldP = new JComboBox<>();
+            if (requestType == RequestType.MOVIE_ISSUE) {
+                // vreau sa am un dropdown pentru a alege din productiile din sistem
+                for (Production production : imdb.getProductionList()) {
+                    titleFieldP.addItem(production);
+                }
+                requestPanel.add(new JLabel("Titlu: "));
+                requestPanel.add(titleFieldP);
+            } else if (requestType == RequestType.ACTOR_ISSUE) {
+                // vreau sa am un dropdown pentru a alege din actorii din sistem
+                for (Actor actor : imdb.getActorList()) {
+                    titleFieldA.addItem(actor);
+                }
+                requestPanel.add(new JLabel("Titlu: "));
+                requestPanel.add(titleFieldA);
+            }
+            JTextArea descriptionArea = new JTextArea(5, 20); // 5 rows, 20 columns
+            descriptionArea.setWrapStyleWord(true);
+            descriptionArea.setLineWrap(true);
+            descriptionArea.setCaretPosition(0);
+            descriptionArea.setEditable(true);
+            requestPanel.add(new JLabel("Descriere: "));
+            JScrollPane descriptionScrollPane = new JScrollPane(descriptionArea);
+            requestPanel.add(descriptionScrollPane);
+            // vreau un buton pentru a trimite cererea
+            JButton sendButton = new JButton("Trimite");
+            requestPanel.add(sendButton);
+            // adaug un listener pentru butonul de send
+            sendButton.addActionListener(e1 -> {
+                // am nevoie de titlu
+                String title = "";
+                if (requestType == RequestType.MOVIE_ISSUE) {
+                    Production production = (Production) titleFieldP.getSelectedItem();
+                    assert production != null;
+                    title = production.getTitlu();
+                } else if (requestType == RequestType.ACTOR_ISSUE) {
+                    Actor actor = (Actor) titleFieldA.getSelectedItem();
+                    assert actor != null;
+                    title = actor.getName();
+                }
+                // am nevoie de descriere
+                String descriere = descriptionArea.getText();
+                // vreau sa stiu user-ul care a creat cererea
+                User user = imdb.getUser(username);
+                // vreau sa creez cererea
+                Request request = Request.creareCerere(requestType, title, descriere, user);
+                // vreau sa adaug cererea in sistem
+                imdb.getRequestList().add(request);
+                // dau mesaj ca s-a adaugat cu succes
+                JOptionPane.showMessageDialog(this, "Cererea a fost trimisa cu succes!");
+            });
+        });
+        JScrollPane scrollPane = new JScrollPane(requestPanel);
+        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+        requestPagePanel.add(scrollPane, BorderLayout.CENTER);
+        return requestPagePanel;
+    }
+
+    private JPanel createRequestsPagePanel(String username, String userAccountType) {
+        User user = imdb.getUser(username);
+        Staff staff = (Staff) user;
+        requestsPanel.setLayout(new BoxLayout(requestsPanel, BoxLayout.Y_AXIS));
+        JPanel requestsPagePanel = new JPanel(new BorderLayout());
+        loadRequests(staff);
+        JScrollPane scrollPane = new JScrollPane(requestsPanel);
+        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+        requestsPagePanel.add(scrollPane, BorderLayout.CENTER);
+        // vreau un buton pentru a face refresh la cereri
+        JButton refreshButton = new JButton("Refresh");
+        requestsPagePanel.add(refreshButton, BorderLayout.SOUTH);
+        // adaug un listener pentru butonul de refresh
+        refreshButton.addActionListener(e -> {
+            loadRequests(staff);
+        });
+        return requestsPagePanel;
+    }
+
+    private void loadRequests(Staff staff) {
+        requestsPanel.removeAll();
+        System.out.println("Username: " + staff.getUserName());
+        List<Request> requestList = staff.getRequestList();
+        for (Request request : requestList) {
+            System.out.println(request.getTipCerere());
+        }
+        System.out.println("Size initial: " + requestList.size());
+        if (staff instanceof Admin) {
+            System.out.println("Admin");
+            System.out.println(RequestsHolder.getListaCereri().size());
+            requestList.addAll(RequestsHolder.getListaCereri());
+        }
+        for (Request request : requestList) {
+            System.out.println(request.getTipCerere());
+            // pentru fiecare cerere vreau sa creez un panel
+            JPanel requestPanel = new JPanel(new GridLayout(0, 2));
+            requestPanel.add(new JLabel("Tip cerere: "));
+            requestPanel.add(new JLabel(request.getTipCerere().toString()));
+            requestPanel.add(new JLabel("Titlu: "));
+            requestPanel.add(new JLabel(request.getTitluCerere()));
+            requestPanel.add(new JLabel("Descriere: "));
+            JTextArea descriptionArea = new JTextArea(5, 20); // 5 rows, 20 columns
+            descriptionArea.setWrapStyleWord(true);
+            descriptionArea.setLineWrap(true);
+            descriptionArea.setCaretPosition(0);
+            descriptionArea.setEditable(false);
+            descriptionArea.setText(request.getDescriereCerere());
+            JScrollPane descriptionScrollPane = new JScrollPane(descriptionArea);
+            requestPanel.add(descriptionScrollPane);
+            requestPanel.add(new JLabel("Username reclamant: "));
+            requestPanel.add(new JLabel(request.getUsernameReclamant()));
+            requestPanel.add(new JLabel("Username rezolvant: "));
+            requestPanel.add(new JLabel(request.getUsernameRezolvant()));
+            // vreau sa am un buton pentru a rezolva cererea
+            JButton solveButton = new JButton("Rezolva");
+            requestPanel.add(solveButton);
+            // adaug un listener pentru butonul de solve
+            solveButton.addActionListener(e -> {
+                // vreau sa stiu user-ul care a rezolvat cererea
+                User user = imdb.getUser(username);
+                // vreau sa rezolv cererea
+                request.rezolvaCerere(user);
+                // dau mesaj ca s-a rezolvat cu succes
+                JOptionPane.showMessageDialog(this, "Cererea a fost rezolvata cu succes!");
+            });
+            // vreau sa am un buton pentru a respinge cererea
+            JButton rejectButton = new JButton("Respinge");
+            requestPanel.add(rejectButton);
+            // adaug un listener pentru butonul de reject
+            rejectButton.addActionListener(e -> {
+                // vreau sa stiu user-ul care a respins cererea
+                User user = imdb.getUser(username);
+                // vreau sa resping cererea
+                request.respingeCerere(user);
+                // dau mesaj ca s-a respins cu succes
+                JOptionPane.showMessageDialog(this, "Cererea a fost respinsa cu succes!");
+            });
+            requestsPanel.add(requestPanel);
+        }
+        requestsPanel.revalidate();
+        requestsPanel.repaint();
     }
 
     private JPanel createAccountPagePanel(String username, String userAccountType) {
@@ -259,7 +797,7 @@ public class MainPage extends JFrame {
                         String descriere = descriptionArea.getText();
                         int numarSezoane = Integer.parseInt(sesonsField.getText());
                         Map<String, List<Episode>> mapSerial = new HashMap<>();
-                        for (int i = 1 ; i <= numarSezoane; i++){
+                        for (int i = 1; i <= numarSezoane; i++) {
                             String[] episodes = episodesAreaList.get(i - 1).getText().split("\n");
                             List<Episode> episodeList = new ArrayList<>();
                             for (String episode : episodes) {
@@ -898,7 +1436,6 @@ public class MainPage extends JFrame {
         });
         for (Actor actor : initialActors) {
             actorListModel.addElement(actor);
-            System.out.println("Initial : " + actor.getName());
         }
         JScrollPane scrollPane = new JScrollPane(actorList);
         actorsPagePanel.add(scrollPane, BorderLayout.CENTER);
@@ -1323,6 +1860,38 @@ public class MainPage extends JFrame {
                 cardLayout.show(cardPanel, "addProduction");
             });
             sidebarPanel.add(addProductionButton);
+            // vreau sa adaug buton pentru a vedea requesturile
+            JButton requestsButton = new JButton("Request-uri de rezolvat");
+            requestsButton.addActionListener(e -> {
+                cardLayout.show(cardPanel, "requests");
+            });
+            sidebarPanel.add(requestsButton);
+        }
+        // creare request
+        JButton createRequestButton = new JButton("Creare Request");
+        createRequestButton.addActionListener(e -> {
+            cardLayout.show(cardPanel, "request");
+        });
+        sidebarPanel.add(createRequestButton);
+        // vizualizare requesturi
+        JButton viewRequestsButton = new JButton("Request-urile Mele");
+        viewRequestsButton.addActionListener(e -> {
+            cardLayout.show(cardPanel, "myRequests");
+        });
+        sidebarPanel.add(viewRequestsButton);
+        if (user.getUserType() == AccountType.ADMIN) {
+            // vizualizare useri
+            JButton viewUsersButton = new JButton("Vizualizare Useri");
+            viewUsersButton.addActionListener(e -> {
+                cardLayout.show(cardPanel, "users");
+            });
+            sidebarPanel.add(viewUsersButton);
+            // creare user
+            JButton createUserButton = new JButton("Creare User");
+            createUserButton.addActionListener(e -> {
+                cardLayout.show(cardPanel, "createUser");
+            });
+            sidebarPanel.add(createUserButton);
         }
         // account page
         JButton accountPageButton = new JButton("Contul Meu");

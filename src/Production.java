@@ -43,6 +43,12 @@ public abstract class Production implements Comparable<Production>, Subject {
     // constructor gol
     public Production() {
     }
+
+    @Override
+    public String toString() {
+        return this.getTitlu();
+    }
+
     // calcul nota finala
     private void calculNota() {
         if (ratingList != null && !ratingList.isEmpty()) {

@@ -10,11 +10,11 @@ public class Contributor extends Staff implements RequestManager {
 
     @Override
     public void createRequest(Request new_request) {
-
+        this.getRequestList().add(new_request);
     }
 
     @Override
     public void removeRequest(Request removed_request) {
-
+        this.getRequestList().remove(removed_request);
     }
 }

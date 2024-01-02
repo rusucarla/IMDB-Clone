@@ -266,4 +266,8 @@ public class Staff extends User implements StaffInterface {
     public void addRequest(Request request) {
         requestList.add(request);
     }
+
+    public void removeRequest(Request request) {
+        requestList.remove(request);
+    }
 }

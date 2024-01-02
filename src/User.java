@@ -238,7 +238,7 @@ public abstract class User implements Comparable<User>, Observer {
             this.credentials = new_credentials;
         }
 
-        private String generateUsername(String name) {
+        String generateUsername(String name) {
             int randomNr = new Random().nextInt(1000) + 1;
             return name.toLowerCase().replace(" ", "_") +
                     +randomNr;

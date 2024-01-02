@@ -455,4 +455,8 @@ public class IMDB {
             e.printStackTrace();
         }
     }
+
+    public List<Request> getRequestList() {
+        return this.requestList;
+    }
 }

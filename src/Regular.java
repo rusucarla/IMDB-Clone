@@ -3,6 +3,7 @@ import java.util.List;
 
 public class Regular extends User implements RequestManager {
     private List<Rating> userRatings;
+    private List<Request> requestList = new ArrayList<>();
 
     public Regular(Information info, AccountType cont, String username, int exp) {
         super(info, cont, username, exp);
@@ -24,12 +25,12 @@ public class Regular extends User implements RequestManager {
 
     @Override
     public void createRequest(Request new_request) {
-
+        this.requestList.add(new_request);
     }
 
     @Override
     public void removeRequest(Request removed_request) {
-
+        this.requestList.remove(removed_request);
     }
 
     public void displayInfo() {
