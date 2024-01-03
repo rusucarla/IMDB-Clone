@@ -409,6 +409,10 @@ public class IMDB {
                 .collect(Collectors.toList());
     }
 
+    public List<Production> filterByActorP(String actor, List<Production> filteredProductions) {
+        return filteredProductions.stream().filter(p -> p.getActoriList().contains(actor)).collect(Collectors.toList());
+    }
+
     public void loadRequests(String pathRequest){
         try {
             ObjectMapper objectMapper = new ObjectMapper();
@@ -458,5 +462,28 @@ public class IMDB {
 
     public List<Request> getRequestList() {
         return this.requestList;
+    }
+
+    public List<Production> filterByType(String selectedType, List<Production> filteredProductions) {
+        if (selectedType.equals("Movie")) {
+            return filteredProductions.stream()
+                    .filter(p -> p instanceof Movie)
+                    .collect(Collectors.toList());
+        } else if (selectedType.equals("Series")) {
+            return filteredProductions.stream()
+                    .filter(p -> p instanceof Series)
+                    .collect(Collectors.toList());
+        }
+        return null;
+    }
+
+    public List<Production> filterByDuration(int duration, List<Production> filteredProductions) {
+        // vreau filmele care au durata <= duration
+        // trebuie sa transform getRunTimp in int
+        // p instanceof Movie
+        return filteredProductions.stream()
+                .filter(p -> p instanceof Movie)
+                .filter(p -> Integer.parseInt(((Movie) p).getRunTimp()) <= duration)
+                .collect(Collectors.toList());
     }
 }

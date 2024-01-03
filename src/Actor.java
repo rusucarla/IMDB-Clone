@@ -48,6 +48,15 @@ public class Actor implements Comparable<Actor>{
         return this.name.compareTo(o.getName());
     }
 
+    public void displayInfo() {
+        System.out.println("Nume: " + this.getName());
+        System.out.println("Biografie: " + this.getBiography());
+        System.out.println("Performante: ");
+        for (Performance performance : this.getPerformances()) {
+            System.out.println(performance.getTitle() + " - " + performance.getType());
+        }
+    }
+
     // Inner class representing performances
     public static class Performance {
         private String title;
@@ -67,6 +76,13 @@ public class Actor implements Comparable<Actor>{
 
         public String getType() {
             return type;
+        }
+        // Setter methods
+        public void setTitle(String title) {
+            this.title = title;
+        }
+        public void setType(String type) {
+            this.type = type;
         }
     }
 }

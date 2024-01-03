@@ -42,6 +42,9 @@ public class Series extends Production {
     public void setMapSerial(Map<String, List<Episode>> mapSerial) {
         this.mapSerial = mapSerial;
     }
+    public List<Episode> getEpisodes(String sezon) {
+        return mapSerial.get(sezon);
+    }
 
     @Override
     public void displayInfo() {
@@ -52,9 +55,10 @@ public class Series extends Production {
         System.out.println("Actori: " + this.actoriList);
         System.out.println("Genul programului: " + this.genreList);
         System.out.println("Descriere: " + this.descriereFilm);
-//        for (Map.Entry<String, List<Episode>> episod : mapSerial.entrySet()) {
-//            System.out.println("Sezon: " + episod.getKey() + "\nEpisoade: " + episod.getValue());
-//        }
+        System.out.println("An Lansare: " + this.releaseAn);
+        System.out.println("Numar sezoane: " + this.numarSezoane);
+        System.out.println("Nota generala: " + this.notaFilm);
+        // afisare episoade
         for (Map.Entry<String, List<Episode>> sezon : mapSerial.entrySet()) {
             System.out.println("Sezon: " + sezon.getKey());
             System.out.println("Episoade: ");

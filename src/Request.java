@@ -53,13 +53,13 @@ public class Request implements Subject {
             RequestsHolder.adaugaCerere(new_request);
             // trebuie sa adaug creatorul cereii in lista de observatori a cererii
             new_request.addObserver(creator);
-//            if (creator instanceof Contributor) {
-//                Contributor contributor = (Contributor) creator;
-//                contributor.createRequest(new_request);
-//            } else if (creator instanceof Regular) {
-//                Regular regular = (Regular) creator;
-//                regular.createRequest(new_request);
-//            }
+            // trebuie sa adaug o notificare pentru toata echipa de admini
+            for (User user : imdb.getUserList()) {
+                if (user.getUserType() == AccountType.ADMIN) {
+                    Admin admin = (Admin) user;
+                    admin.update("A fost adaugata o noua cerere in lista de cereri comuna");
+                }
+            }
             return new_request;
         } else {
             // trebuie sa vad cine a introdus productia / actorul in sistem
@@ -76,13 +76,9 @@ public class Request implements Subject {
                                 staff.addRequest(new_request);
                                 // trebuie sa adaug creatorul cereii in lista de observatori a cererii
                                 new_request.addObserver(creator);
-//                                if (creator instanceof Contributor) {
-//                                    Contributor contributor = (Contributor) creator;
-//                                    contributor.createRequest(new_request);
-//                                } else if (creator instanceof Regular) {
-//                                    Regular regular = (Regular) creator;
-//                                    regular.createRequest(new_request);
-//                                }
+                                // vreau sa trimit o notificare utilizatorului rezolvator
+                                // ca a fost adaugata o noua cerere in lista lui de cereri
+                                staff.update("A fost adaugata o noua cerere in lista ta de cereri");
                                 return new_request;
                             }
                         }
@@ -101,13 +97,6 @@ public class Request implements Subject {
                                 staff.addRequest(new_request);
                                 // trebuie sa adaug creatorul cereii in lista de observatori a cererii
                                 new_request.addObserver(creator);
-//                                if (creator instanceof Contributor) {
-//                                    Contributor contributor = (Contributor) creator;
-//                                    contributor.createRequest(new_request);
-//                                } else if (creator instanceof Regular) {
-//                                    Regular regular = (Regular) creator;
-//                                    regular.createRequest(new_request);
-//                                }
                                 return new_request;
                             }
                         }
@@ -208,8 +197,16 @@ public class Request implements Subject {
             // vreau sa adaug exp-ul user-ului care a semnalat cererea
             // care e observator al cererii
             User userReclamant = imdb.getUser(this.usernameReclamant);
-            userReclamant.setExperienceStrategy(new RequestStrategy());
-            userReclamant.updateExperience();
+            // admin-ul nu primeste exp
+            if (!(userReclamant instanceof Admin)) {
+                if (this.tipCerere == RequestType.MOVIE_ISSUE) {
+                    userReclamant.setExperienceStrategy(new RequestProductionStrategy());
+                    userReclamant.updateExperience();
+                } else if (this.tipCerere == RequestType.ACTOR_ISSUE) {
+                    userReclamant.setExperienceStrategy(new RequestActorStrategy());
+                    userReclamant.updateExperience();
+                }
+            }
         }
         // sterg cererea din lista de cereri a user-ului care a rezolvat-o
         User userRezolvator = imdb.getUser(this.usernameRezolvant);
@@ -218,6 +215,24 @@ public class Request implements Subject {
             staff.removeRequest(this);
         } else {
             RequestsHolder.stergeCerere(this);
+            Staff staff = (Staff) user;
+            staff.removeRequest(this);
+        }
+        // sterge cererea din lista IMDb
+        imdb.getRequestList().remove(this);
+        // vreau sa semnalez ca cererea a fost rezolvata
+        // dau o notificare user-ului care a rezolvat cererea
+        // daca usernameRezolvator este ADMIN_USERNAME, atunci notific toata echipa de admini
+        if (Objects.equals(usernameRezolvant, ADMIN_USERNAME)) {
+            for (User user1 : imdb.getUserList()) {
+                if (user1.getUserType() == AccountType.ADMIN) {
+                    Admin admin = (Admin) user1;
+                    admin.update("Cererea " + this.tipCerere + " a fost rezolvata");
+                }
+            }
+        } else {
+            Staff staff = (Staff) userRezolvator;
+            staff.update("Cererea " + this.tipCerere + " a fost rezolvata");
         }
         this.solved = true;
     }
@@ -237,10 +252,22 @@ public class Request implements Subject {
             Staff staff = (Staff) userRezolvator;
             staff.removeRequest(this);
         } else {
-            System.out.println("Sterg cererea din lista de cereri comuna");
             RequestsHolder.stergeCerere(this);
             Staff staff = (Staff) user;
             staff.removeRequest(this);
+        }
+        // sterge cererea din lista IMDb
+        imdb.getRequestList().remove(this);
+        if (Objects.equals(usernameRezolvant, ADMIN_USERNAME)) {
+            for (User user1 : imdb.getUserList()) {
+                if (user1.getUserType() == AccountType.ADMIN) {
+                    Admin admin = (Admin) user1;
+                    admin.update("Cererea " + this.tipCerere + " a fost rezolvata");
+                }
+            }
+        } else {
+            Staff staff = (Staff) userRezolvator;
+            staff.update("Cererea " + this.tipCerere + " a fost rezolvata");
         }
         this.rejected = true;
     }

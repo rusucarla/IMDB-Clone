@@ -88,6 +88,12 @@ public class LoginFrame extends JFrame {
     private void startCLI(String userType) {
         // Cod pentru inițializarea CLI
         JOptionPane.showMessageDialog(null, "Continuă în CLI!");
+        // Ascunde sau închide fereastra de login
+        LoginFrame.this.setVisible(false);
+        LoginFrame.this.dispose();
+        // as vrea o clasa care sa se ocupe de CLI
+        CLI cli = new CLI(userType);
+        cli.run();
     }
 
     public static void main(String[] args) {

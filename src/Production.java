@@ -27,6 +27,7 @@ public abstract class Production implements Comparable<Production>, Subject {
     @JsonProperty("averageRating")
     protected double notaFilm;
     private List<Observer> observers = new ArrayList<>();
+    private List<Rating> deletedRatings = new ArrayList<>();
 
     // constructor
     public Production(String titlu, List<String> regizori, List<String> actori,
@@ -121,6 +122,10 @@ public abstract class Production implements Comparable<Production>, Subject {
     public abstract void displayInfo(
     );
 
+    public List<Rating> getDeletedRatings() {
+        return deletedRatings;
+    }
+
     @Override
     public int compareTo(Production o) {
         return this.titlu.compareTo(o.titlu);
@@ -146,11 +151,11 @@ public abstract class Production implements Comparable<Production>, Subject {
         }
     }
     public void addObserver(Observer observer) {
-        System.out.println("Adding observer " + observer);
+//        System.out.println("Adding observer " + observer);
         observers.add(observer);
     }
     public void removeObserver(Observer observer) {
-        System.out.println("Removing observer " + observer);
+//        System.out.println("Removing observer " + observer);
         observers.remove(observer);
     }
 
@@ -158,6 +163,7 @@ public abstract class Production implements Comparable<Production>, Subject {
         for (Rating rating : ratingList) {
             if (rating.getUsernameRater().equals(username)) {
                 ratingList.remove(rating);
+                deletedRatings.add(rating);
                 calculNota();
                 break;
             }
