@@ -33,6 +33,11 @@ public class Regular extends User implements RequestManager {
         this.requestList.remove(removed_request);
     }
 
+    // getter pentru lista de rating-uri
+    public List<Rating> getUserRatings() {
+        return userRatings;
+    }
+
     public void displayInfo() {
         System.out.println("Nume: " + this.getInformation().getUserNume());
         System.out.println("Email: " + this.getInformation().getUserCredentials().getEmail());

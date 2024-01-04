@@ -82,6 +82,30 @@ public class Request implements Subject {
                                 return new_request;
                             }
                         }
+                        // daca user-ul este admin atunci trebuie sa caut in lista de productii comune
+                        if (staff instanceof Admin){
+                            for (Production production : Admin.getProductionsContributionCommon()){
+                                if (production.getTitlu().equals(titluCerere)) {
+                                    // cererea va fi rezolvata de catre ADMIN
+                                    usernameRezolvator = ADMIN_USERNAME;
+                                    Request new_request = new Request(tipCerere, titluCerere, descriereCerere,
+                                            creator.getUserName(), usernameRezolvator);
+                                    // daca trebuie rezolvata de admin, o adaug in lista comuna de cereri din RequestHoler
+                                    RequestsHolder.adaugaCerere(new_request);
+                                    // trebuie sa adaug creatorul cereii in lista de observatori a cererii
+                                    new_request.addObserver(creator);
+                                    // trebuie sa adaug o notificare pentru toata echipa de admini
+                                    for (User user1 : imdb.getUserList()) {
+                                        if (user1.getUserType() == AccountType.ADMIN) {
+                                            Admin admin = (Admin) user1;
+                                            admin.update("A fost adaugata o noua cerere in lista de cereri comuna");
+                                        }
+                                    }
+                                    return new_request;
+
+                                }
+                            }
+                        }
                     }
                 }
             } else if (tipCerere == RequestType.ACTOR_ISSUE) {
@@ -98,6 +122,29 @@ public class Request implements Subject {
                                 // trebuie sa adaug creatorul cereii in lista de observatori a cererii
                                 new_request.addObserver(creator);
                                 return new_request;
+                            }
+                        }
+                        // daca user-ul este admin atunci trebuie sa caut in lista de productii comune
+                        if (staff instanceof Admin){
+                            for (Actor actor : Admin.getActorsContributionCommon()){
+                                if (actor.getName().equals(titluCerere)) {
+                                    // cererea va fi rezolvata de catre ADMIN
+                                    usernameRezolvator = ADMIN_USERNAME;
+                                    Request new_request = new Request(tipCerere, titluCerere, descriereCerere,
+                                            creator.getUserName(), usernameRezolvator);
+                                    // daca trebuie rezolvata de admin, o adaug in lista comuna de cereri din RequestHoler
+                                    RequestsHolder.adaugaCerere(new_request);
+                                    // trebuie sa adaug creatorul cereii in lista de observatori a cererii
+                                    new_request.addObserver(creator);
+                                    // trebuie sa adaug o notificare pentru toata echipa de admini
+                                    for (User user1 : imdb.getUserList()) {
+                                        if (user1.getUserType() == AccountType.ADMIN) {
+                                            Admin admin = (Admin) user1;
+                                            admin.update("A fost adaugata o noua cerere in lista de cereri comuna");
+                                        }
+                                    }
+                                    return new_request;
+                                }
                             }
                         }
                     }

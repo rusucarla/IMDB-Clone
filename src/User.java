@@ -97,7 +97,7 @@ public abstract class User implements Comparable<User>, Observer {
 //    }
     public void add_favorite_production(Production new_production) {
         this.favoriteProductions.add(new_production);
-        System.out.println("New favorite production: " + new_production.getTitlu());
+//        System.out.println("New favorite production: " + new_production.getTitlu());
         // trebuie sa devina observer pentru aceasta productie
         new_production.addObserver(this);
     }
@@ -135,7 +135,7 @@ public abstract class User implements Comparable<User>, Observer {
     }
     public void update(String notification) {
         this.notifications.add(notification);
-        System.out.println("Notification for " + this.username + ": " + notification);
+//        System.out.println("Notification for " + this.username + ": " + notification);
     }
     // metoda pentru a adauga observer la toate productiile din lista de favorite
     public void addObservers() {
@@ -143,8 +143,28 @@ public abstract class User implements Comparable<User>, Observer {
             Staff staff = (Staff) this;
             staff.addObservers();
         } else {
+            if (this.favoriteProductions == null || this.favoriteProductions.isEmpty()) {
+                return;
+            }
             for (Production production : this.favoriteProductions) {
                 production.addObserver(this);
+            }
+            if (this.favoriteActors == null || this.favoriteActors.isEmpty()) {
+                return;
+            }
+            for (Actor actor : this.favoriteActors) {
+                actor.addObserver(this);
+            }
+            // vreau sa devina observer si pentru toate productiile la care a dat rating
+            // doar daca user e Regular
+            if (this instanceof Regular) {
+                Regular regular = (Regular) this;
+                if (regular.getUserRatings() == null) {
+                    return;
+                }
+                for (Rating rating : regular.getUserRatings()) {
+                    rating.addObserver(this);
+                }
             }
         }
     }

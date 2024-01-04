@@ -255,11 +255,14 @@ public class Staff extends User implements StaffInterface {
         super.update(notification);
     }
     public void addObservers() {
-        if (productionsContribution == null) {
+        if (productionsContribution == null || actorsContribution == null) {
             return;
         }
         for (Production p : productionsContribution) {
             p.addObserver(this);
+        }
+        for (Actor a : actorsContribution) {
+            a.addObserver(this);
         }
     }
 

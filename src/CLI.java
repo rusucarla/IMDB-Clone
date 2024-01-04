@@ -40,7 +40,17 @@ public class CLI {
         // vreau sa fac optiunea pentru contul meu
         System.out.println("15. Contul meu");
         Scanner scanner = new Scanner(System.in);
-        int option_home = scanner.nextInt();
+        int option_home = 0;
+        boolean valid = false;
+        while (!valid) {
+            try {
+                option_home = scanner.nextInt();
+                valid = true;
+            } catch (Exception e) {
+                System.out.println("Opțiune invalidă!");
+                scanner.nextLine();
+            }
+        }
         switch (option_home) {
             case 1:
                 // Log out
@@ -173,8 +183,17 @@ public class CLI {
         System.out.println("2. Rezolva request");
         System.out.println("3. Respinge request");
         Scanner scanner = new Scanner(System.in);
-        int option_received_requests = scanner.nextInt();
-        scanner.nextLine();
+        int option_received_requests = 0;
+        boolean valid_received_requests = false;
+        while (!valid_received_requests) {
+            try {
+                option_received_requests = scanner.nextInt();
+                valid_received_requests = true;
+            } catch (Exception e) {
+                System.out.println("Opțiune invalidă!");
+                scanner.nextLine();
+            }
+        }
         switch (option_received_requests) {
             case 1:
                 // Inapoi la meniul principal
@@ -263,8 +282,17 @@ public class CLI {
         System.out.println("1. Inapoi la meniul principal");
         System.out.println("2. Retrage request");
         Scanner scanner = new Scanner(System.in);
-        int option_sent_requests = scanner.nextInt();
-        scanner.nextLine();
+        int option_sent_requests = 0;
+        boolean valid_sent_requests = false;
+        while (!valid_sent_requests) {
+            try {
+                option_sent_requests = scanner.nextInt();
+                valid_sent_requests = true;
+            } catch (Exception e) {
+                System.out.println("Opțiune invalidă!");
+                scanner.nextLine();
+            }
+        }
         switch (option_sent_requests) {
             case 1:
                 // Inapoi la meniul principal
@@ -316,8 +344,17 @@ public class CLI {
         System.out.println("4. DELETE_ACCOUNT (stergere cont)");
         System.out.println("5. Inapoi");
         Scanner scanner = new Scanner(System.in);
-        int option_create_request = scanner.nextInt();
-        scanner.nextLine();
+        int option_create_request = 0;
+        boolean valid_create_request = false;
+        while (!valid_create_request) {
+            try {
+                option_create_request = scanner.nextInt();
+                valid_create_request = true;
+            } catch (Exception e) {
+                System.out.println("Opțiune invalidă!");
+                scanner.nextLine();
+            }
+        }
         switch (option_create_request) {
             case 1:
                 // MOVIE_ISSUE
@@ -388,8 +425,17 @@ public class CLI {
         System.out.println("1. Inapoi");
         System.out.println("2. Alege actor");
         Scanner scanner = new Scanner(System.in);
-        int option_create_actor_issue = scanner.nextInt();
-        scanner.nextLine();
+        int option_create_actor_issue = 0;
+        boolean valid_create_actor_issue = false;
+        while (!valid_create_actor_issue) {
+            try {
+                option_create_actor_issue = scanner.nextInt();
+                valid_create_actor_issue = true;
+            } catch (Exception e) {
+                System.out.println("Opțiune invalidă!");
+                scanner.nextLine();
+            }
+        }
         switch (option_create_actor_issue) {
             case 1:
                 // Inapoi
@@ -448,8 +494,17 @@ public class CLI {
         System.out.println("1. Inapoi");
         System.out.println("2. Alege film");
         Scanner scanner = new Scanner(System.in);
-        int option_create_movie_issue = scanner.nextInt();
-        scanner.nextLine();
+        int option_create_movie_issue = 0;
+        boolean valid_create_movie_issue = false;
+        while (!valid_create_movie_issue) {
+            try {
+                option_create_movie_issue = scanner.nextInt();
+                valid_create_movie_issue = true;
+            } catch (Exception e) {
+                System.out.println("Opțiune invalidă!");
+                scanner.nextLine();
+            }
+        }
         switch (option_create_movie_issue) {
             case 1:
                 // Inapoi
@@ -505,7 +560,17 @@ public class CLI {
         System.out.println("1. Inapoi la meniul principal");
         System.out.println("2. Vizualizare detalii user");
         Scanner scanner = new Scanner(System.in);
-        int option_users = scanner.nextInt();
+        int option_users = 0;
+        boolean valid_users = false;
+        while (!valid_users) {
+            try {
+                option_users = scanner.nextInt();
+                valid_users = true;
+            } catch (Exception e) {
+                System.out.println("Opțiune invalidă!");
+                scanner.nextLine();
+            }
+        }
         switch (option_users) {
             case 1:
                 // Inapoi la meniul principal
@@ -558,8 +623,17 @@ public class CLI {
         System.out.println("2. Modifica user");
         System.out.println("3. Sterge user");
         Scanner scanner = new Scanner(System.in);
-        int option_user_details = scanner.nextInt();
-        scanner.nextLine();
+        int option_user_details = 0;
+        boolean valid_user_details = false;
+        while (!valid_user_details) {
+            try {
+                option_user_details = scanner.nextInt();
+                valid_user_details = true;
+            } catch (Exception e) {
+                System.out.println("Opțiune invalidă!");
+                scanner.nextLine();
+            }
+        }
         switch (option_user_details) {
             case 1:
                 // Inapoi la lista de useri
@@ -615,8 +689,17 @@ public class CLI {
         System.out.println("4. Modifica gen");
         System.out.println("5. Inapoi");
         Scanner scanner = new Scanner(System.in);
-        int option_update_user = scanner.nextInt();
-        scanner.nextLine();
+        int option_update_user = 0;
+        boolean valid_update_user = false;
+        while (!valid_update_user) {
+            try {
+                option_update_user = scanner.nextInt();
+                valid_update_user = true;
+            } catch (Exception e) {
+                System.out.println("Opțiune invalidă!");
+                scanner.nextLine();
+            }
+        }
         switch (option_update_user) {
             case 1:
                 // Modifica nume
@@ -678,7 +761,17 @@ public class CLI {
         System.out.println("2. Admin");
         System.out.println("3. Contributor");
         Scanner scanner = new Scanner(System.in);
-        int option_create_user = scanner.nextInt();
+        int option_create_user = 0;
+        boolean valid_create_user = false;
+        while (!valid_create_user) {
+            try {
+                option_create_user = scanner.nextInt();
+                valid_create_user = true;
+            } catch (Exception e) {
+                System.out.println("Opțiune invalidă!");
+                scanner.nextLine();
+            }
+        }
         switch (option_create_user) {
             case 1:
                 // Regular
@@ -748,6 +841,7 @@ public class CLI {
         Admin admin = new Admin(information, AccountType.ADMIN, username, 0);
         // adaug user-ul in lista de useri
         imdb.getUserList().add(admin);
+        showMainMenu();
     }
 
     private void createContributor() {
@@ -800,6 +894,7 @@ public class CLI {
         Contributor contributor = new Contributor(information, AccountType.CONTRIBUTOR, username, 0);
         // adaug user-ul in lista de useri
         imdb.getUserList().add(contributor);
+        showMainMenu();
     }
 
     private void createRegular() {
@@ -852,6 +947,7 @@ public class CLI {
         Regular regular = new Regular(information, AccountType.REGULAR, username, 0);
         // adaug user-ul in lista de useri
         imdb.getUserList().add(regular);
+        showMainMenu();
     }
 
     private void showAccount() {
@@ -927,7 +1023,17 @@ public class CLI {
         System.out.println("2. Serial");
         System.out.println("3. Inapoi");
         Scanner scanner = new Scanner(System.in);
-        int option_add_production = scanner.nextInt();
+        int option_add_production = 0;
+        boolean valid_add_production = false;
+        while (!valid_add_production) {
+            try {
+                option_add_production = scanner.nextInt();
+                valid_add_production = true;
+            } catch (Exception e) {
+                System.out.println("Opțiune invalidă!");
+                scanner.nextLine();
+            }
+        }
         switch (option_add_production) {
             case 1:
                 // Film
@@ -1130,7 +1236,17 @@ public class CLI {
         System.out.println("1. Inapoi la meniul principal");
         System.out.println("2. Vizualizare detalii actor");
         Scanner scanner = new Scanner(System.in);
-        int option_actors = scanner.nextInt();
+        int option_actors = 0;
+        boolean valid_actors = false;
+        while (!valid_actors) {
+            try {
+                option_actors = scanner.nextInt();
+                valid_actors = true;
+            } catch (Exception e) {
+                System.out.println("Opțiune invalidă!");
+                scanner.nextLine();
+            }
+        }
         switch (option_actors) {
             case 1:
                 // Inapoi la meniul principal
@@ -1176,7 +1292,17 @@ public class CLI {
         System.out.println("1. Inapoi la meniul principal");
         System.out.println("2. Vizualizare detalii producție");
         Scanner scanner = new Scanner(System.in);
-        int option_productions = scanner.nextInt();
+        int option_productions = 0;
+        boolean valid_productions = false;
+        while (!valid_productions) {
+            try {
+                option_productions = scanner.nextInt();
+                valid_productions = true;
+            } catch (Exception e) {
+                System.out.println("Opțiune invalidă!");
+                scanner.nextLine();
+            }
+        }
         switch (option_productions) {
             case 1:
                 // Inapoi la meniul principal
@@ -1228,7 +1354,17 @@ public class CLI {
         System.out.println("1. Inapoi la meniul principal");
         System.out.println("2. Vizualizare detalii actor");
         Scanner scanner = new Scanner(System.in);
-        int option_actors = scanner.nextInt();
+        int option_actors = 0;
+        boolean valid_actors = false;
+        while (!valid_actors) {
+            try {
+                option_actors = scanner.nextInt();
+                valid_actors = true;
+            } catch (Exception e) {
+                System.out.println("Opțiune invalidă!");
+                scanner.nextLine();
+            }
+        }
         switch (option_actors) {
             case 1:
                 // Inapoi la meniul principal
@@ -1267,7 +1403,17 @@ public class CLI {
         System.out.println("1. Inapoi la meniul principal");
         System.out.println("2. Vizualizare detalii producție");
         Scanner scanner = new Scanner(System.in);
-        int option_productions = scanner.nextInt();
+        int option_productions = 0;
+        boolean valid_productions = false;
+        while (!valid_productions) {
+            try {
+                option_productions = scanner.nextInt();
+                valid_productions = true;
+            } catch (Exception e) {
+                System.out.println("Opțiune invalidă!");
+                scanner.nextLine();
+            }
+        }
         switch (option_productions) {
             case 1:
                 // Inapoi la meniul principal
@@ -1301,7 +1447,17 @@ public class CLI {
         System.out.println("1. Inapoi la meniul principal");
         System.out.println("2. Vizualizare detalii actor");
         Scanner scanner = new Scanner(System.in);
-        int option_actors = scanner.nextInt();
+        int option_actors = 0;
+        boolean valid_actors = false;
+        while (!valid_actors) {
+            try {
+                option_actors = scanner.nextInt();
+                valid_actors = true;
+            } catch (Exception e) {
+                System.out.println("Opțiune invalidă!");
+                scanner.nextLine();
+            }
+        }
         switch (option_actors) {
             case 1:
                 // Inapoi la meniul principal
@@ -1310,7 +1466,17 @@ public class CLI {
             case 2:
                 // Vizualizare detalii actor
                 System.out.println("Alege un actor:");
-                int actorIndex = scanner.nextInt();
+                int actorIndex = 0;
+                boolean valid_actor = false;
+                while (!valid_actor) {
+                    try {
+                        actorIndex = scanner.nextInt();
+                        valid_actor = true;
+                    } catch (Exception e) {
+                        System.out.println("Opțiune invalidă!");
+                        scanner.nextLine();
+                    }
+                }
                 if (actorIndex < 1 || actorIndex > actors.size()) {
                     System.out.println("Opțiune invalidă!");
                     showActors();
@@ -1332,7 +1498,17 @@ public class CLI {
         System.out.println("3. Performante");
         System.out.println("4. Inapoi");
         Scanner scanner = new Scanner(System.in);
-        int option_modify_actor = scanner.nextInt();
+        int option_modify_actor = 0;
+        boolean valid_modify_actor = false;
+        while (!valid_modify_actor) {
+            try {
+                option_modify_actor = scanner.nextInt();
+                valid_modify_actor = true;
+            } catch (Exception e) {
+                System.out.println("Opțiune invalidă!");
+                scanner.nextLine();
+            }
+        }
         switch (option_modify_actor) {
             case 1:
                 // Nume
@@ -1367,7 +1543,17 @@ public class CLI {
                 System.out.println("2. Modifică performanță");
                 System.out.println("3. Șterge performanță");
                 System.out.println("4. Inapoi");
-                int option_performances = scanner.nextInt();
+                int option_performances = 0;
+                boolean valid_performances = false;
+                while (!valid_performances) {
+                    try {
+                        option_performances = scanner.nextInt();
+                        valid_performances = true;
+                    } catch (Exception e) {
+                        System.out.println("Opțiune invalidă!");
+                        scanner.nextLine();
+                    }
+                }
                 switch (option_performances) {
                     case 1:
                         // Adaugă performanță
@@ -1400,7 +1586,17 @@ public class CLI {
                         System.out.println("Alege o opțiune:");
                         System.out.println("1. Titlu");
                         System.out.println("2. Tip");
-                        int option_modify_performance2 = scanner.nextInt();
+                        int option_modify_performance2 = 0;
+                        boolean valid_modify_performance2 = false;
+                        while (!valid_modify_performance2) {
+                            try {
+                                option_modify_performance2 = scanner.nextInt();
+                                valid_modify_performance2 = true;
+                            } catch (Exception e) {
+                                System.out.println("Opțiune invalidă!");
+                                scanner.nextLine();
+                            }
+                        }
                         switch (option_modify_performance2) {
                             case 1:
                                 // Titlu
@@ -1494,8 +1690,37 @@ public class CLI {
                 }
             }
         }
+        // vreau si posibilitatea de a dauga rating actorului
+        boolean rated = false;
+        if (user.getUserType() == AccountType.REGULAR) {
+            if (actor.getRatingList() == null) {
+                System.out.println("4. Adaugă recenzie");
+            } else {
+                for (Rating rating : actor.getRatingList()) {
+                    if (Objects.equals(rating.getUsernameRater(), username)) {
+                        rated = true;
+                        break;
+                    }
+                }
+                if (!rated) {
+                    System.out.println("4. Adaugă recenzie");
+                } else {
+                    System.out.println("4. Sterge recenzie");
+                }
+            }
+        }
         Scanner scanner = new Scanner(System.in);
-        int option_actor_details = scanner.nextInt();
+        int option_actor_details = 0;
+        boolean valid_actor_details = false;
+        while (!valid_actor_details) {
+            try {
+                option_actor_details = scanner.nextInt();
+                valid_actor_details = true;
+            } catch (Exception e) {
+                System.out.println("Opțiune invalidă!");
+                scanner.nextLine();
+            }
+        }
         switch (option_actor_details) {
             case 1:
                 // Inapoi la lista de actori
@@ -1523,6 +1748,63 @@ public class CLI {
                     showActorDetails(actor);
                 }
                 break;
+            case 4:
+                if (user.getUserType() != AccountType.REGULAR) {
+                    System.out.println("Opțiune invalidă!");
+                    showActorDetails(actor);
+                    return;
+                }
+                if (rated) {
+                    // Sterge recenzie
+                    Regular regular = (Regular) user;
+                    regular.remove_rating();
+                    actor.removeRating(username);
+                } else {
+                    // Adaugă recenzie
+                    System.out.println("Adaugă recenzie:");
+                    System.out.println("Nota (1-10):");
+                    int nota = 0;
+                    // verific daca nota este valida
+                    // sau daca nu a fost introdusa o litera
+                    boolean valid_nota = false;
+                    while (!valid_nota) {
+                        try {
+                            nota = scanner.nextInt();
+                            if (nota < 1 || nota > 10) {
+                                System.out.println("Nota trebuie sa fie intre 1 si 10!");
+                            } else {
+                                valid_nota = true;
+                            }
+                        } catch (Exception e) {
+                            System.out.println("Nota trebuie sa fie un numar!");
+                            scanner.nextLine();
+                        }
+                    }
+                    scanner.nextLine();
+                    System.out.println("Comentarii:");
+                    String comentarii = scanner.nextLine();
+                    Regular regular = (Regular) user;
+                    regular.add_rating(nota, comentarii);
+                    actor.addRating(new Rating(username, nota, comentarii));
+                    // trebuie sa adaug exp-ul user-ului
+                    boolean rated_before = false;
+                    if (actor.getDeletedRatings() == null){
+                        actor.setDeletedRatings(new ArrayList<>());
+                    } else {
+                        for (Rating rating : actor.getDeletedRatings()) {
+                            if (Objects.equals(rating.getUsernameRater(), username)) {
+                                rated_before = true;
+                                break;
+                            }
+                        }
+                    }
+                    if (!rated_before) {
+                        user.setExperienceStrategy(new ReviewStrategy());
+                        user.updateExperience();
+                    }
+                }
+                showActorDetails(actor);
+                break;
             default:
                 System.out.println("Opțiune invalidă!");
                 showActorDetails(actor);
@@ -1541,7 +1823,17 @@ public class CLI {
         System.out.println("1. Inapoi la meniul principal");
         System.out.println("2. Vizualizare detalii producție");
         Scanner scanner = new Scanner(System.in);
-        int option_productions = scanner.nextInt();
+        int option_productions = 0;
+        boolean valid_productions = false;
+        while (!valid_productions) {
+            try {
+                option_productions = scanner.nextInt();
+                valid_productions = true;
+            } catch (Exception e) {
+                System.out.println("Opțiune invalidă!");
+                scanner.nextLine();
+            }
+        }
         switch (option_productions) {
             case 1:
                 // Inapoi la meniul principal
@@ -1614,7 +1906,22 @@ public class CLI {
             }
         }
         Scanner scanner = new Scanner(System.in);
-        int option_production_details = scanner.nextInt();
+        int option_production_details = 0;
+        // ma asigur ca se introduce un numar
+        boolean valid = false;
+        while (!valid) {
+            try {
+                option_production_details = scanner.nextInt();
+                if (option_production_details < 1 || option_production_details > 4) {
+                    System.out.println("Opțiune invalidă!");
+                } else {
+                    valid = true;
+                }
+            } catch (Exception e) {
+                System.out.println("Opțiune invalidă!");
+                scanner.nextLine();
+            }
+        }
         switch (option_production_details) {
             case 1:
                 // Inapoi la lista de producții
@@ -1638,14 +1945,14 @@ public class CLI {
                     int nota = 0;
                     // verific daca nota este valida
                     // sau daca nu a fost introdusa o litera
-                    boolean valid = false;
-                    while (!valid) {
+                    boolean valid_nota = false;
+                    while (!valid_nota) {
                         try {
                             nota = scanner.nextInt();
                             if (nota < 1 || nota > 10) {
                                 System.out.println("Nota trebuie sa fie intre 1 si 10!");
                             } else {
-                                valid = true;
+                                valid_nota = true;
                             }
                         } catch (Exception e) {
                             System.out.println("Nota trebuie sa fie un numar!");
@@ -1888,7 +2195,21 @@ public class CLI {
                     System.out.println("2. Adaugă episoade");
                     System.out.println("3. Modifică episoade");
                     System.out.println("4. Șterge episoade");
-                    int option_detail_seasons = scanner.nextInt();
+                    int option_detail_seasons = 0;
+                    boolean valid_detail = false;
+                    while (!valid_detail) {
+                        try {
+                            option_detail_seasons = scanner.nextInt();
+                            if (option_detail_seasons < 1 || option_detail_seasons > 4) {
+                                System.out.println("Opțiune invalidă!");
+                            } else {
+                                valid_detail = true;
+                            }
+                        } catch (Exception e) {
+                            System.out.println("Opțiune invalidă!");
+                            scanner.nextLine();
+                        }
+                    }
                     switch (option_detail_seasons) {
                         case 1:
                             // Inapoi
@@ -1919,7 +2240,21 @@ public class CLI {
                     System.out.println("Alege o opțiune:");
                     System.out.println("1. Inapoi");
                     System.out.println("2. Adaugă episoade");
-                    int option_detail_seasons = scanner.nextInt();
+                    int option_detail_seasons = 0;
+                    boolean valid_detail_season = false;
+                    while (!valid_detail_season) {
+                        try {
+                            option_detail_seasons = scanner.nextInt();
+                            if (option_detail_seasons < 1 || option_detail_seasons > 2) {
+                                System.out.println("Opțiune invalidă!");
+                            } else {
+                                valid_detail_season = true;
+                            }
+                        } catch (Exception e) {
+                            System.out.println("Opțiune invalidă!");
+                            scanner.nextLine();
+                        }
+                    }
                     switch (option_detail_seasons) {
                         case 1:
                             // Inapoi
@@ -1988,7 +2323,21 @@ public class CLI {
         System.out.println("Alege o opțiune:");
         System.out.println("1. Nume episod");
         System.out.println("2. Durata episod");
-        int option2 = scanner.nextInt();
+        int option2 = 0;
+        boolean valid_episode = false;
+        while (!valid_episode) {
+            try {
+                option2 = scanner.nextInt();
+                if (option2 < 1 || option2 > 2) {
+                    System.out.println("Opțiune invalidă!");
+                } else {
+                    valid_episode = true;
+                }
+            } catch (Exception e) {
+                System.out.println("Opțiune invalidă!");
+                scanner.nextLine();
+            }
+        }
         switch (option2) {
             case 1:
                 // Nume episod
@@ -2042,7 +2391,22 @@ public class CLI {
         System.out.println("7. An lansare");
         System.out.println("8. Inapoi");
         Scanner scanner = new Scanner(System.in);
-        int option = scanner.nextInt();
+        int option = 0;
+        // vreau sa ma asigur ca se introduce un numar
+        boolean valid_movie = false;
+        while (!valid_movie) {
+            try {
+                option = scanner.nextInt();
+                if (option < 1 || option > 8) {
+                    System.out.println("Opțiune invalidă!");
+                } else {
+                    valid_movie = true;
+                }
+            } catch (Exception e) {
+                System.out.println("Opțiune invalidă!");
+                scanner.nextLine();
+            }
+        }
         switch (option) {
             case 1:
                 // Titlu

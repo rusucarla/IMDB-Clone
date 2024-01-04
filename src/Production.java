@@ -134,11 +134,13 @@ public abstract class Production implements Comparable<Production>, Subject {
     public void addRating(Rating rating) {
         this.ratingList.add(rating);
         calculNota();
+        // vreau sa adaug si utilizatorul care a dat rating ca observer
+        User user = IMDB.getInstance().getUser(rating.getUsernameRater());
+        addObserver(user);
         // vreau sa notific userii care au adaugat acest film la favorite
         // si user-ul care a adaugat productia in sistem
         String notification = "New rating for " + this.titlu + " from " + rating.getUsernameRater() +
-                " with " + rating.getNotaRating() + " points" + " and comment: " + rating.getComentariiRater();
-        System.out.println("New rating");
+                " with " + rating.getNotaRating() + " and comment: " + rating.getComentariiRater();
         notifyAllObservers(notification);
     }
 
@@ -164,6 +166,9 @@ public abstract class Production implements Comparable<Production>, Subject {
             if (rating.getUsernameRater().equals(username)) {
                 ratingList.remove(rating);
                 deletedRatings.add(rating);
+                // vreau sa scot de la observer user-ul care a dat rating
+                User user = IMDB.getInstance().getUser(username);
+                removeObserver(user);
                 calculNota();
                 break;
             }
