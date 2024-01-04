@@ -444,7 +444,17 @@ public class CLI {
             case 2:
                 // Alege actor
                 System.out.println("Alege un actor:");
-                int actorIndex = scanner.nextInt();
+                int actorIndex = 0;
+                boolean valid_actor_index = false;
+                while (!valid_actor_index) {
+                    try {
+                        actorIndex = scanner.nextInt();
+                        valid_actor_index = true;
+                    } catch (Exception e) {
+                        System.out.println("Opțiune invalidă!");
+                        scanner.nextLine();
+                    }
+                }
                 scanner.nextLine();
                 if (actorIndex < 1 || actorIndex > imdb.getActorList().size()) {
                     System.out.println("Opțiune invalidă!");
@@ -994,12 +1004,24 @@ public class CLI {
         }
         System.out.println("Biografie:");
         String biografie = scanner.nextLine();
-        System.out.println("Performante: Exemplu: \"Titlu1 - Tip1, Titlu2 - Tip2\"");
+        System.out.println("Performante: Exemplu: Titlu1 - Tip1, Titlu2 - Tip2");
         String performante = scanner.nextLine();
         List<Actor.Performance> performanceList = new ArrayList<>();
         String[] performanceArray = performante.split(", ");
         for (String performance : performanceArray) {
             String[] performanceDetails = performance.split(" - ");
+            // vreau sa verific validitatea performantei
+            if (performanceDetails.length != 2) {
+                System.out.println("Performanta trebuie sa fie de forma Titlu - Tip!");
+                addActor();
+                return;
+            }
+            // trebuie sa verific daca tipul este valid: Series sau Movie
+            if (!performanceDetails[1].equals("Series") && !performanceDetails[1].equals("Movie")) {
+                System.out.println("Tipul trebuie sa fie Series sau Movie!");
+                addActor();
+                return;
+            }
             Actor.Performance performance1 = new Actor.Performance(performanceDetails[0], performanceDetails[1]);
             performanceList.add(performance1);
         }
@@ -1141,6 +1163,12 @@ public class CLI {
                 String titlu_episod = scanner.nextLine();
                 System.out.println("Durata: Exemplu: \"x minutes\"");
                 String durata_episod = scanner.nextLine();
+                // vreau sa verific daca durata este valida
+                if (!durata_episod.contains("minutes")) {
+                    System.out.println("Durata trebuie sa fie de forma x minutes!");
+                    addSeries();
+                    return;
+                }
                 Episode episode = new Episode(titlu_episod, durata_episod);
                 episodes.add(episode);
             }
@@ -1213,6 +1241,12 @@ public class CLI {
         }
         System.out.println("Durata: Exemplu: \"x minutes\"");
         String durata = scanner.nextLine();
+        // vreau sa verific daca durata este valida
+        if (!durata.contains("minutes")) {
+            System.out.println("Durata trebuie sa fie de forma x minutes!");
+            addMovie();
+            return;
+        }
         // creez filmul
         Movie movie = new Movie(titlu, regizoriList, actoriList,
                 genreList, new ArrayList<>(), descriere, durata, an_aparitie);
@@ -1255,7 +1289,17 @@ public class CLI {
             case 2:
                 // Vizualizare detalii actor
                 System.out.println("Alege un actor:");
-                int actorIndex = scanner.nextInt();
+                int actorIndex = 0;
+                boolean valid_actor_index = false;
+                while (!valid_actor_index) {
+                    try {
+                        actorIndex = scanner.nextInt();
+                        valid_actor_index = true;
+                    } catch (Exception e) {
+                        System.out.println("Opțiune invalidă!");
+                        scanner.nextLine();
+                    }
+                }
                 if (actorIndex < 1 || actorIndex > actors.size()) {
                     System.out.println("Opțiune invalidă!");
                     showFavoriteActors();
@@ -1311,7 +1355,17 @@ public class CLI {
             case 2:
                 // Vizualizare detalii producție
                 System.out.println("Alege o producție:");
-                int productionIndex = scanner.nextInt();
+                int productionIndex = 0;
+                boolean valid_production_index = false;
+                while (!valid_production_index) {
+                    try {
+                        productionIndex = scanner.nextInt();
+                        valid_production_index = true;
+                    } catch (Exception e) {
+                        System.out.println("Opțiune invalidă!");
+                        scanner.nextLine();
+                    }
+                }
                 if (productionIndex < 1 || productionIndex > productions.size()) {
                     System.out.println("Opțiune invalidă!");
                     showFavoriteProductions();
@@ -1373,7 +1427,17 @@ public class CLI {
             case 2:
                 // Vizualizare detalii actor
                 System.out.println("Alege un actor:");
-                int actorIndex = scanner.nextInt();
+                int actorIndex = 0;
+                boolean valid_actor = false;
+                while (!valid_actor) {
+                    try {
+                        actorIndex = scanner.nextInt();
+                        valid_actor = true;
+                    } catch (Exception e) {
+                        System.out.println("Opțiune invalidă!");
+                        scanner.nextLine();
+                    }
+                }
                 if (actorIndex < 1 || actorIndex > actors.size()) {
                     System.out.println("Opțiune invalidă!");
                     showActorsContribution();
@@ -1422,7 +1486,17 @@ public class CLI {
             case 2:
                 // Vizualizare detalii producție
                 System.out.println("Alege o producție:");
-                int productionIndex = scanner.nextInt();
+                int productionIndex = 0;
+                boolean valid_production = false;
+                while (!valid_production) {
+                    try {
+                        productionIndex = scanner.nextInt();
+                        valid_production = true;
+                    } catch (Exception e) {
+                        System.out.println("Opțiune invalidă!");
+                        scanner.nextLine();
+                    }
+                }
                 if (productionIndex < 1 || productionIndex > productions.size()) {
                     System.out.println("Opțiune invalidă!");
                     showProductionsContribution();
@@ -1842,7 +1916,17 @@ public class CLI {
             case 2:
                 // Vizualizare detalii producție
                 System.out.println("Alege o producție:");
-                int productionIndex = scanner.nextInt();
+                int productionIndex = 0;
+                boolean valid_production = false;
+                while (!valid_production) {
+                    try {
+                        productionIndex = scanner.nextInt();
+                        valid_production = true;
+                    } catch (Exception e) {
+                        System.out.println("Opțiune invalidă!");
+                        scanner.nextLine();
+                    }
+                }
                 if (productionIndex < 1 || productionIndex > productions.size()) {
                     System.out.println("Opțiune invalidă!");
                     showProductions();
