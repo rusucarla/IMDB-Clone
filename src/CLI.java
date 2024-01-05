@@ -301,7 +301,17 @@ public class CLI {
             case 2:
                 // Retrage request
                 System.out.println("Alege un request:");
-                int requestIndex = scanner.nextInt();
+                int requestIndex = 0;
+                boolean valid_request_index = false;
+                while (!valid_request_index) {
+                    try {
+                        requestIndex = scanner.nextInt();
+                        valid_request_index = true;
+                    } catch (Exception e) {
+                        System.out.println("Opțiune invalidă!");
+                        scanner.nextLine();
+                    }
+                }
                 scanner.nextLine();
                 if (requestIndex < 1 || requestIndex > requestList.size()) {
                     System.out.println("Opțiune invalidă!");
@@ -415,7 +425,13 @@ public class CLI {
         // de a alege actorul si de a descrie problema
         System.out.println("Creare request ACTOR_ISSUE:");
         System.out.println("Alege un actor:");
-        List<Actor> actorList = imdb.getActorList();
+        List<Actor> actorList = imdb.getActorList().stream()
+                .filter(a -> (user.getUserType() != AccountType.CONTRIBUTOR ||
+                        !((Contributor) user).getActorsContribution().contains(a)) &&
+                        (user.getUserType() != AccountType.ADMIN ||
+                                !Admin.getActorsContributionCommon().contains(a) ||
+                                !((Admin) user).getActorsContribution().contains(a)))
+                .toList();
         int i = 1;
         for (Actor actor : actorList) {
             System.out.println(i + ". " + actor.getName());
@@ -494,7 +510,13 @@ public class CLI {
         // de a alege filmul si de a descrie problema
         System.out.println("Creare request MOVIE_ISSUE:");
         System.out.println("Alege un film:");
-        List<Production> productionList = imdb.getProductionList();
+        List<Production> productionList = imdb.getProductionList().stream()
+                .filter(p -> (user.getUserType() != AccountType.CONTRIBUTOR ||
+                        !((Contributor) user).getProductionsContribution().contains(p)) &&
+                        (user.getUserType() != AccountType.ADMIN ||
+                                !Admin.getProductionsContributionCommon().contains(p) ||
+                                !((Admin) user).getProductionsContribution().contains(p)))
+                .toList();
         int i = 1;
         for (Production production : productionList) {
             System.out.println(i + ". " + production.getTitlu());
@@ -523,7 +545,17 @@ public class CLI {
             case 2:
                 // Alege film
                 System.out.println("Alege un film:");
-                int movieIndex = scanner.nextInt();
+                int movieIndex = 0;
+                boolean valid_movie_index = false;
+                while (!valid_movie_index) {
+                    try {
+                        movieIndex = scanner.nextInt();
+                        valid_movie_index = true;
+                    } catch (Exception e) {
+                        System.out.println("Opțiune invalidă!");
+                        scanner.nextLine();
+                    }
+                }
                 scanner.nextLine();
                 if (movieIndex < 1 || movieIndex > imdb.getProductionList().size()) {
                     System.out.println("Opțiune invalidă!");
@@ -589,7 +621,17 @@ public class CLI {
             case 2:
                 // Vizualizare detalii user
                 System.out.println("Alege un user:");
-                int userIndex = scanner.nextInt();
+                int userIndex = 0;
+                boolean valid_user_index = false;
+                while (!valid_user_index) {
+                    try {
+                        userIndex = scanner.nextInt();
+                        valid_user_index = true;
+                    } catch (Exception e) {
+                        System.out.println("Opțiune invalidă!");
+                        scanner.nextLine();
+                    }
+                }
                 if (userIndex < 1 || userIndex > imdb.getUserList().size()) {
                     System.out.println("Opțiune invalidă!");
                     showUsers();
@@ -978,7 +1020,17 @@ public class CLI {
         System.out.println("Alege o opțiune:");
         System.out.println("1. Inapoi la meniul principal");
         Scanner scanner = new Scanner(System.in);
-        int option_account = scanner.nextInt();
+        int option_account = 0;
+        boolean valid_account = false;
+        while (!valid_account) {
+            try {
+                option_account = scanner.nextInt();
+                valid_account = true;
+            } catch (Exception e) {
+                System.out.println("Opțiune invalidă!");
+                scanner.nextLine();
+            }
+        }
         if (option_account == 1) {
             // Inapoi la meniul principal
             showMainMenu();
@@ -1649,7 +1701,17 @@ public class CLI {
                             Actor.Performance performance1 = actor.getPerformances().get(i);
                             System.out.println((i + 1) + ". " + performance1.getTitle() + " - " + performance1.getType());
                         }
-                        int option_modify_performance = scanner.nextInt();
+                        int option_modify_performance = 0;
+                        boolean valid_modify_performance = false;
+                        while (!valid_modify_performance) {
+                            try {
+                                option_modify_performance = scanner.nextInt();
+                                valid_modify_performance = true;
+                            } catch (Exception e) {
+                                System.out.println("Opțiune invalidă!");
+                                scanner.nextLine();
+                            }
+                        }
                         if (option_modify_performance < 1 || option_modify_performance > actor.getPerformances().size()) {
                             System.out.println("Opțiune invalidă!");
                             modifyActor(actor);
@@ -1703,7 +1765,17 @@ public class CLI {
                             Actor.Performance performance2 = actor.getPerformances().get(i);
                             System.out.println((i + 1) + ". " + performance2.getTitle() + " - " + performance2.getType());
                         }
-                        int option_delete_performance = scanner.nextInt();
+                        int option_delete_performance = 0;
+                        boolean valid_delete_performance = false;
+                        while (!valid_delete_performance) {
+                            try {
+                                option_delete_performance = scanner.nextInt();
+                                valid_delete_performance = true;
+                            } catch (Exception e) {
+                                System.out.println("Opțiune invalidă!");
+                                scanner.nextLine();
+                            }
+                        }
                         if (option_delete_performance < 1 || option_delete_performance > actor.getPerformances().size()) {
                             System.out.println("Opțiune invalidă!");
                             modifyActor(actor);
@@ -2376,7 +2448,21 @@ public class CLI {
             System.out.println((i + 1) + ". " + episode.getNumeEpisod() + " - " + episode.getDurataEpisod());
         }
         Scanner scanner = new Scanner(System.in);
-        int option = scanner.nextInt();
+        int option = 0;
+        boolean valid_episode = false;
+        while (!valid_episode) {
+            try {
+                option = scanner.nextInt();
+                if (option < 1 || option > episodes.size()) {
+                    System.out.println("Opțiune invalidă!");
+                } else {
+                    valid_episode = true;
+                }
+            } catch (Exception e) {
+                System.out.println("Opțiune invalidă!");
+                scanner.nextLine();
+            }
+        }
         if (option < 1 || option > episodes.size()) {
             System.out.println("Opțiune invalidă!");
             deleteEpisode(sezonKey, episodes, production);
@@ -2396,7 +2482,17 @@ public class CLI {
             System.out.println((i + 1) + ". " + episode.getNumeEpisod() + " - " + episode.getDurataEpisod());
         }
         Scanner scanner = new Scanner(System.in);
-        int option = scanner.nextInt();
+        int option = 0;
+        boolean valid_episode_choice = false;
+        while (!valid_episode_choice) {
+            try {
+                option = scanner.nextInt();
+                valid_episode_choice = true;
+            } catch (Exception e) {
+                System.out.println("Opțiune invalidă!");
+                scanner.nextLine();
+            }
+        }
         if (option < 1 || option > episodes.size()) {
             System.out.println("Opțiune invalidă!");
             modifyEpisode(sezonKey, episodes, production);
@@ -2566,7 +2662,18 @@ public class CLI {
             case 7:
                 // An lansare
                 System.out.println("An lansare nou:");
-                int an = scanner.nextInt();
+                int an = 0;
+                // verific daca anul este valid
+                boolean valid_an = false;
+                while (!valid_an) {
+                    try {
+                        an = scanner.nextInt();
+                        valid_an = true;
+                    } catch (Exception e) {
+                        System.out.println("Anul trebuie sa fie un numar!");
+                        scanner.nextLine();
+                    }
+                }
                 movie.setReleaseAn(an);
                 System.out.println("An lansare modificat!");
                 modifyMovie(production);
