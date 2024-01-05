@@ -24,8 +24,6 @@ public class MainPage extends JFrame {
     public MainPage(String username) {
         this.username = username;
         this.userAccountType = imdb.checkUserType(username);
-        System.out.println(userAccountType);
-        System.out.println(username);
         initUI();
     }
 
@@ -376,7 +374,6 @@ public class MainPage extends JFrame {
                 if (!country.equals(selectedUser.getInformation().getUserCountry())) {
                     // daca da, atunci modific
                     selectedUser.getInformation().setUserCountry(country);
-                    System.out.println(selectedUser.getInformation().getUserCountry());
                 }
                 // verific daca user-ul a modificat genul
                 if (!gender.equals(selectedUser.getInformation().getGender())) {
@@ -425,7 +422,6 @@ public class MainPage extends JFrame {
         myrequestsPanel.removeAll();
         // vreau sa arat doar cererile facute de user-ul curent
         List<Request> requestList = new ArrayList<>();
-        System.out.println("Username: " + user.getUserName());
         for (Request request : imdb.getRequestList()) {
             if (request.getUsernameReclamant().equals(user.getUserName())) {
                 requestList.add(request);
@@ -487,19 +483,35 @@ public class MainPage extends JFrame {
         // adaug un listener pentru butonul de continue
         continueButton.addActionListener(e -> {
             RequestType requestType = (RequestType) requestTypeComboBox.getSelectedItem();
-            System.out.println(requestType);
             JComboBox<Actor> titleFieldA = new JComboBox<>();
             JComboBox<Production> titleFieldP = new JComboBox<>();
+            User user_contributii = imdb.getUser(username);
             if (requestType == RequestType.MOVIE_ISSUE) {
                 // vreau sa am un dropdown pentru a alege din productiile din sistem
-                for (Production production : imdb.getProductionList()) {
+                // vreau sa ma asigur ca un utilizator nu isi poate alege propriile contributii
+                List<Production> productions = imdb.getProductionList().stream()
+                        .filter(p -> (user_contributii.getUserType() != AccountType.CONTRIBUTOR ||
+                                !((Contributor) user_contributii).getProductionsContribution().contains(p)) &&
+                                (user_contributii.getUserType() != AccountType.ADMIN ||
+                                        !Admin.getProductionsContributionCommon().contains(p) ||
+                                        !((Admin) user_contributii).getProductionsContribution().contains(p)))
+                        .toList();
+                for (Production production : productions) {
                     titleFieldP.addItem(production);
                 }
                 requestPanel.add(new JLabel("Titlu: "));
                 requestPanel.add(titleFieldP);
             } else if (requestType == RequestType.ACTOR_ISSUE) {
                 // vreau sa am un dropdown pentru a alege din actorii din sistem
-                for (Actor actor : imdb.getActorList()) {
+                // vreau sa ma asigur ca un utilizator nu isi poate alege propriile contributii
+                List<Actor> actors = imdb.getActorList().stream()
+                        .filter(a -> (user_contributii.getUserType() != AccountType.CONTRIBUTOR ||
+                                !((Contributor) user_contributii).getActorsContribution().contains(a)) &&
+                                (user_contributii.getUserType() != AccountType.ADMIN ||
+                                        !Admin.getActorsContributionCommon().contains(a) ||
+                                        !((Admin) user_contributii).getActorsContribution().contains(a)))
+                        .toList();
+                for (Actor actor : actors) {
                     titleFieldA.addItem(actor);
                 }
                 requestPanel.add(new JLabel("Titlu: "));
@@ -580,14 +592,10 @@ public class MainPage extends JFrame {
     private void loadRequests(Staff staff) {
         requestsPanel.removeAll();
         List<Request> requestList = staff.getRequestList();
-        for (Request request : requestList) {
-            System.out.println(request.getTipCerere());
-        }
         if (staff instanceof Admin) {
             requestList.addAll(RequestsHolder.getListaCereri());
         }
         for (Request request : requestList) {
-            System.out.println(request.getTipCerere());
             // pentru fiecare cerere vreau sa creez un panel
             JPanel requestPanel = new JPanel(new GridLayout(0, 2));
             requestPanel.add(new JLabel("Tip cerere: "));
@@ -689,7 +697,7 @@ public class MainPage extends JFrame {
         JPanel addProductionPagePanel = new JPanel(new BorderLayout());
         JPanel addProductionPanel = new JPanel(new GridLayout(0, 1));
         JButton movieButton = new JButton("Adauga Movie");
-        JButton seriesButton = new JButton("Adauga Series");
+        JButton seriesButton = new JButton("Adauga Series (doar unul per login session)");
         // adaug un listener pentru butonul de movie
         ActionListener seriesButtonListener = e -> {
             // resetez panelul
@@ -1536,7 +1544,6 @@ public class MainPage extends JFrame {
         });
         favoriteProductionsPagePanel.add(refreshButton, BorderLayout.NORTH);
         User user = imdb.getUser(username);
-        System.out.println("In favorite: " + user.getFavoriteProductions());
         TreeSet<Production> initialProductions = user.getFavoriteProductions();
         for (Production production : initialProductions) {
             productionListModel.addElement(production);
@@ -1589,7 +1596,6 @@ public class MainPage extends JFrame {
         });
         favoriteActorsPagePanel.add(refreshButton, BorderLayout.NORTH);
         User user = imdb.getUser(username);
-        System.out.println("In favorite: " + user.getFavoriteActors());
         TreeSet<Actor> initialActors = user.getFavoriteActors();
         for (Actor actor : initialActors) {
             actorListModel.addElement(actor);
@@ -1643,7 +1649,6 @@ public class MainPage extends JFrame {
             });
             for (Actor actor : refreshActors) {
                 actorListModel.addElement(actor);
-                System.out.println("Dupa refresh : " + actor.getName());
             }
             actorList.setModel(actorListModel);
         });
@@ -1698,7 +1703,6 @@ public class MainPage extends JFrame {
                     List<Actor> refreshActors = imdb.getActorList();
                     for (Actor actor : refreshActors) {
                         actorListModel.addElement(actor);
-                        System.out.println("Dupa click: " + actor.getName());
                     }
                 }
             }
@@ -1902,13 +1906,10 @@ public class MainPage extends JFrame {
                         Staff staff = (Staff) user;
                         staff.removeActorSystem(selectedActor.getName());
                         //afisez lista de actori
-                        System.out.println("1.sunt aici - " + actorListModel.size());
                         actorListModel.clear();
                         List<Actor> initialActors = imdb.getActorList();
-                        System.out.println("2.sunt aici - " + initialActors.size());
                         for (Actor actor1 : initialActors) {
                             actorListModel.addElement(actor1);
-                            System.out.println("3.sunt aici - " + actor1.getName());
                         }
                         // inchid fereastra de modificare
                         modifyDialog.dispose();
@@ -2037,24 +2038,13 @@ public class MainPage extends JFrame {
                 addOrRemoveButton.setText("Sterge din Favorite");
                 addOrRemoveButton.addActionListener(e -> {
                     // sterge actorul din lista de actori a utilizatorului curent
-//                    Regular regular = (Regular) user;
-//                    regular.remove_favorite_actor(selectedActor);
                     user.remove_favorite_actor(selectedActor);
-                    // afisez lista de actori preferati
-                    System.out.println("sunt aici -");
-                    System.out.println(user.getFavoriteActors());
-
                 });
             } else {
                 addOrRemoveButton.setText("Adauga la Favorite");
                 addOrRemoveButton.addActionListener(e -> {
                     // adauga actorul in lista de actori a utilizatorului curent
-//                    Regular regular = (Regular) user;
-//                    regular.add_favorite_actor(selectedActor);
                     user.add_favorite_actor(selectedActor);
-                    // afisez lista de actori preferati
-                    System.out.println("sunt aici +");
-                    System.out.println(user.getFavoriteActors());
                 });
             }
         }
@@ -2353,9 +2343,21 @@ public class MainPage extends JFrame {
         genreList.setBorder(BorderFactory.createTitledBorder("Genuri"));
         // Create a model and list for the ratings
         DefaultListModel<String> ratingModel = new DefaultListModel<>();
-        for (Rating rating : selectedproduction.getRatingList()) {
-            ratingModel.addElement(rating.getUsernameRater() + " - " + rating.getNotaRating() + " - " + rating.getComentariiRater());
-        }
+        Runnable loadRatings = () -> {
+            // Sortează rating-urile în funcție de experiența utilizatorilor
+            selectedproduction.getRatingList().sort((r1, r2) -> {
+                User user1 = IMDB.getInstance().getUser(r1.getUsernameRater());
+                User user2 = IMDB.getInstance().getUser(r2.getUsernameRater());
+                return Integer.compare(user2.getExperience(), user1.getExperience());
+            });
+
+            // Actualizează modelul listei cu rating-uri sortate
+            ratingModel.clear();
+            for (Rating rating : selectedproduction.getRatingList()) {
+                ratingModel.addElement(rating.getUsernameRater() + " - " + rating.getNotaRating() + " - " + rating.getComentariiRater());
+            }
+        };
+        loadRatings.run();
         JList<String> ratingList = new JList<>(ratingModel);
         ratingList.setBorder(BorderFactory.createTitledBorder("Rating"));
         // Scroll pane for director list
@@ -2792,7 +2794,6 @@ public class MainPage extends JFrame {
                             if (selectedproduction instanceof Movie) {
                                 int releaseYear = Integer.parseInt(releaseYearField.getText());
                                 Movie movie = new Movie(title, directors, actors, genres, ratings, description, runtimeField.getText(), releaseYear);
-                                System.out.println("MOVIE :");
                                 movie.displayInfo();
                                 if (Objects.equals(movie.getTitlu(), selectedproduction.getTitlu())) {
                                     staff.updateProduction(movie);
@@ -2817,7 +2818,6 @@ public class MainPage extends JFrame {
                                 int numarSezoane = Integer.parseInt(numarSezoaneField.getText());
                                 Series series = new Series(title, directors, actors, genres, ratings, description, releaseYear, numarSezoane);
                                 series.setMapSerial(mapSerial);
-                                System.out.println("SERIES :");
                                 series.displayInfo();
                                 if (Objects.equals(series.getTitlu(), selectedproduction.getTitlu())) {
                                     staff.updateProduction(series);
@@ -2870,6 +2870,14 @@ public class MainPage extends JFrame {
             }
         }
 //        detailsDialog.add(buttonPanel, BorderLayout.SOUTH);
+        JButton refreshButton = new JButton("Refresh Ratings");
+        refreshButton.addActionListener(e -> {
+            // Reîncarcă rating-urile și actualizează lista
+            loadRatings.run();
+            ratingList.revalidate();
+            ratingList.repaint();
+        });
+        buttonPanel.add(refreshButton);
         JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, ratingScrollPane, buttonPanel);
 //        splitPane.setResizeWeight(0.5);
         detailsDialog.add(splitPane, BorderLayout.SOUTH);
@@ -2895,168 +2903,4 @@ public class MainPage extends JFrame {
             }
         }
     }
-
-
-    //    private JTable productionsTable;
-//    private ProductionTableModel tableModel;
-//    private String userAccountType;
-//
-//    public MainPage(String userAccountType) {
-//        this.userAccountType = userAccountType;
-//        initUI();
-//    }
-//
-//    private void initUI() {
-//        setTitle("Pagina Principală - IMDB");
-//        setSize(800, 600);
-//        setLocationRelativeTo(null);
-//        setDefaultCloseOperation(EXIT_ON_CLOSE);
-//
-//        // Setează layout-ul principal
-//        setLayout(new BorderLayout());
-//
-//        // Adaugă bara de meniu
-//        setJMenuBar(createMenuBar());
-//
-//        // Adaugă panoul cu filtre și conținutul central
-////        add(createFilterPanel(), BorderLayout.WEST);
-//        add(createContentPanel(), BorderLayout.CENTER);
-//    }
-//
-//
-//    private JMenuBar createMenuBar() {
-//        JMenuBar menuBar = new JMenuBar();
-//
-//        // Meniu File
-//        JMenu fileMenu = new JMenu("Get Out");
-//        JMenuItem logoutItem = new JMenuItem("Logout");
-//        logoutItem.addActionListener((event) -> {
-//            // Logică de delogare
-//            System.exit(0); // sau arată din nou fereastra de login
-//        });
-//        fileMenu.add(logoutItem);
-//
-//        // Meniu Navigare
-//        JMenu navigateMenu = new JMenu("Navigate");
-//        JMenuItem actorsPageItem = new JMenuItem("Actors Page");
-//        actorsPageItem.addActionListener((event) -> {
-//            // Logică pentru a deschide pagina actorilor
-//        });
-//        navigateMenu.add(actorsPageItem);
-//
-//        menuBar.add(fileMenu);
-//        menuBar.add(navigateMenu);
-//        // Adaugă alte meniuri după necesitate
-//
-//        return menuBar;
-//    }
-//
-//
-//    private JPanel createFilterPanel() {
-//        JPanel filterPanel = new JPanel(new GridBagLayout());
-//        GridBagConstraints gbc = new GridBagConstraints();
-//        gbc.gridwidth = GridBagConstraints.REMAINDER;  // Componentele se termină la sfârșitul rândului
-//        gbc.anchor = GridBagConstraints.CENTER;  // Ancorează componentele în centrul spațiului lor
-//        gbc.insets = new Insets(5, 0, 5, 0);  // Adaugă un spațiu vertical între componente
-//        // Adaugă filtre (gen, rating etc.)
-//        filterPanel.add(new JLabel("Filtru dupa Gen:"), gbc);
-//        JComboBox<Genre> genreComboBox = new JComboBox<>(Genre.values());
-////        genreComboBox.setMaximumSize(new Dimension(150, 20));
-//        filterPanel.add(genreComboBox, gbc);
-//        filterPanel.add(new JLabel("Filtru dupa Regizor:"), gbc);
-//        JComboBox<String> directorComboBox = new JComboBox<>(new String[]{"Orice Regizor", "Quentin Tarantino", "Nolan", "Spielberg", "Scorsese"});
-//        filterPanel.add(directorComboBox, gbc);
-////        filterPanel.add(Box.createRigidArea(new Dimension(0, 5)));
-//        JTextField ratingField = new JTextField(5);
-//        ratingField.setMaximumSize(new Dimension(50, 20));
-//        filterPanel.add(new JLabel("Rating minim:"), gbc);
-//        filterPanel.add(ratingField, gbc);
-//        filterPanel.add(Box.createRigidArea(new Dimension(0, 5)));
-//        JButton applyFiltersButton = new JButton("Aplică Filtrele");
-//        filterPanel.add(applyFiltersButton, gbc);
-//        JButton resetFiltersButton = new JButton("Resetează Filtrele");
-//        filterPanel.add(resetFiltersButton, gbc);
-//
-//        // Adaugă listener pentru butonul de resetare
-//        resetFiltersButton.addActionListener(e -> {
-//            try {
-//                tableModel = new ProductionTableModel(imdb.getProductionList());
-//                // ... additional logic if necessary
-//                productionsTable.setModel(tableModel);
-//                // reseteaza casutele de filtrare
-//                genreComboBox.setSelectedIndex(0);
-//                directorComboBox.setSelectedIndex(0);
-//                ratingField.setText("");
-//                productionsTable.revalidate();
-//                productionsTable.repaint();
-//            } catch (Exception ex) {
-//                ex.printStackTrace(); // Log the exception to the console
-//            }
-//        });
-//
-//        // Adaugă listener pentru butonul de filtrare
-//        applyFiltersButton.addActionListener(e -> {
-//            List<Production> filteredProductions = imdb.getProductionList();
-//            System.out.println(filteredProductions.size());
-//            // Aplică filtrele
-//            Genre selectedGenre = (Genre) genreComboBox.getSelectedItem();
-//            if (selectedGenre != null) {
-//                filteredProductions = imdb.filterByGenre(selectedGenre.toString(), filteredProductions);
-//            }
-//            String selectedDirector = (String) directorComboBox.getSelectedItem();
-//            if (selectedDirector != null && !selectedDirector.equals("Orice Regizor")) {
-//                filteredProductions = imdb.filterByDirector(selectedDirector, filteredProductions);
-//            }
-//            String ratingText = ratingField.getText();
-//            if (!ratingText.isEmpty()) {
-//                try {
-//                    double rating = Double.parseDouble(ratingText);
-//                    filteredProductions = imdb.filterByRating(rating, filteredProductions);
-//                } catch (NumberFormatException ex) {
-//                    JOptionPane.showMessageDialog(this, "Rating-ul trebuie să fie un număr!");
-//                }
-//            }
-//            // Actualizează tabelul
-//            tableModel.setProductions(filteredProductions);
-//            tableModel.fireTableDataChanged();
-//            tableModel.fireTableStructureChanged();
-//        });
-//        filterPanel.add(Box.createVerticalGlue()); // Adaugă un spațiu gol pentru a poziționa butonul în partea de jos
-//        return filterPanel;
-//    }
-//
-//
-//    private JPanel createContentPanel() {
-//        JPanel contentPanel = new JPanel(new BorderLayout());
-//        contentPanel.add(new JLabel("Conținut Recomandat"), BorderLayout.NORTH);
-//
-//        // Inițializează tabelul cu producții
-//        resetTableModel();
-//        productionsTable = new JTable(tableModel);
-//        contentPanel.add(new JScrollPane(productionsTable), BorderLayout.CENTER);
-//
-//        // Adauga zona de filtrare
-//        contentPanel.add(createFilterPanel(), BorderLayout.EAST);
-//
-//        // Listener pentru dublu-clic pe tabel
-//        productionsTable.addMouseListener(new MouseAdapter() {
-//            public void mouseClicked(MouseEvent e) {
-//                if (e.getClickCount() == 2) {
-//                    int selectedRow = productionsTable.getSelectedRow();
-//                    if (selectedRow >= 0) {
-//                        Production selectedProduction = tableModel.getProductionAt(selectedRow);
-//                        openProductionDetails(selectedProduction);
-//                    }
-//                }
-//            }
-//        });
-//
-//        return contentPanel;
-//    }
-//
-//    private void resetTableModel() {
-//        tableModel = new ProductionTableModel(imdb.getProductionList());
-//    }
-//
-
 }
