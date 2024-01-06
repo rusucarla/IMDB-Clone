@@ -121,6 +121,9 @@ public class Request implements Subject {
                                 staff.addRequest(new_request);
                                 // trebuie sa adaug creatorul cereii in lista de observatori a cererii
                                 new_request.addObserver(creator);
+                                // vreau sa trimit o notificare utilizatorului rezolvator
+                                // ca a fost adaugata o noua cerere in lista lui de cereri
+                                staff.update("A fost adaugata o noua cerere in lista ta de cereri");
                                 return new_request;
                             }
                         }
@@ -327,8 +330,17 @@ public class Request implements Subject {
             User userRezolvator = imdb.getUser(this.usernameRezolvant);
             Staff staff = (Staff) userRezolvator;
             staff.removeRequest(this);
+            // vreau sa stie user-ul care trebuia sa rezolve cererea ca a fost retrasa
+            staff.update("Cererea " + this.tipCerere + " a fost retrasa");
         } else {
             RequestsHolder.stergeCerere(this);
+            // vreau ca toata echipa de admini sa stie ca a fost retrasa cererea
+            for (User user : imdb.getUserList()) {
+                if (user.getUserType() == AccountType.ADMIN) {
+                    Admin admin1 = (Admin) user;
+                    admin1.update("Cererea " + this.tipCerere + " a fost retrasa");
+                }
+            }
             if (user1 instanceof Admin) {
                 Admin admin = (Admin) user1;
                 admin.removeRequest(this);

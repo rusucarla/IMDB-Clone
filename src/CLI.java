@@ -852,7 +852,7 @@ public class CLI {
         String email = scanner.nextLine();
         System.out.println("Nume:");
         String nume = scanner.nextLine();
-        System.out.println("Data nasterii: Exemplu: \"yy-MM-dd\"");
+        System.out.println("Data nasterii: Exemplu: \"yyyy-MM-dd\"");
         String data_nasterii = scanner.nextLine();
         // vreau sa verific daca data nasterii este valida
         LocalDate birthDate = null;
@@ -862,13 +862,17 @@ public class CLI {
                 birthDate = LocalDate.parse(data_nasterii);
                 valid = true;
             } catch (Exception e) {
-                System.out.println("Data nasterii trebuie sa fie de forma yy-MM-dd!");
+                System.out.println("Data nasterii trebuie sa fie de forma yyyy-MM-dd!");
             }
         }
         System.out.println("Tara:");
         String tara = scanner.nextLine();
         System.out.println("Gen:");
         String gen = scanner.nextLine();
+        if (!gen.equals("Female") && !gen.equals("Male")){
+            System.out.println("Genul trebuie sa fie ori Female ori Male!");
+            createUser();
+        }
         // creez informatiile user-ului
         User.Information information = new User.Information();
         String password = PasswordGenerator.generatePassword();
@@ -905,7 +909,7 @@ public class CLI {
         String email = scanner.nextLine();
         System.out.println("Nume:");
         String nume = scanner.nextLine();
-        System.out.println("Data nasterii: Exemplu: \"yy-MM-dd\"");
+        System.out.println("Data nasterii: Exemplu: \"yyyy-MM-dd\"");
         String data_nasterii = scanner.nextLine();
         // vreau sa verific daca data nasterii este valida
         LocalDate birthDate = null;
@@ -915,13 +919,17 @@ public class CLI {
                 birthDate = LocalDate.parse(data_nasterii);
                 valid = true;
             } catch (Exception e) {
-                System.out.println("Data nasterii trebuie sa fie de forma yy-MM-dd!");
+                System.out.println("Data nasterii trebuie sa fie de forma yyyy-MM-dd!");
             }
         }
         System.out.println("Tara:");
         String tara = scanner.nextLine();
         System.out.println("Gen:");
         String gen = scanner.nextLine();
+        if (!gen.equals("Female") && !gen.equals("Male")){
+            System.out.println("Genul trebuie sa fie ori Female ori Male!");
+            createUser();
+        }
         // creez informatiile user-ului
         User.Information information = new User.Information();
         String password = PasswordGenerator.generatePassword();
@@ -958,7 +966,7 @@ public class CLI {
         String email = scanner.nextLine();
         System.out.println("Nume:");
         String nume = scanner.nextLine();
-        System.out.println("Data nasterii: Exemplu: \"yy-MM-dd\"");
+        System.out.println("Data nasterii: Exemplu: \"yyyy-MM-dd\"");
         String data_nasterii = scanner.nextLine();
         // vreau sa verific daca data nasterii este valida
         LocalDate birthDate = null;
@@ -968,13 +976,18 @@ public class CLI {
                 birthDate = LocalDate.parse(data_nasterii);
                 valid = true;
             } catch (Exception e) {
-                System.out.println("Data nasterii trebuie sa fie de forma yy-MM-dd!");
+                System.out.println("Data nasterii trebuie sa fie de forma yyyy-MM-dd!");
             }
         }
         System.out.println("Tara:");
         String tara = scanner.nextLine();
-        System.out.println("Gen:");
+        System.out.println("Gen: Female/Male");
         String gen = scanner.nextLine();
+        // trebuie sa verific daca genul este in formatul ok
+        if (!gen.equals("Female") && !gen.equals("Male")){
+            System.out.println("Genul trebuie sa fie ori Female ori Male!");
+            createUser();
+        }
         // creez informatiile user-ului
         User.Information information = new User.Information();
         String password = PasswordGenerator.generatePassword();
@@ -1934,7 +1947,7 @@ public class CLI {
                     actor.addRating(new Rating(username, nota, comentarii));
                     // trebuie sa adaug exp-ul user-ului
                     boolean rated_before = false;
-                    if (actor.getDeletedRatings() == null){
+                    if (actor.getDeletedRatings() == null) {
                         actor.setDeletedRatings(new ArrayList<>());
                     } else {
                         for (Rating rating : actor.getDeletedRatings()) {
@@ -1968,6 +1981,7 @@ public class CLI {
         System.out.println("Alege o optiune:");
         System.out.println("1. Inapoi la meniul principal");
         System.out.println("2. Vizualizare detalii producție");
+        System.out.println("3. Optiuni de filtrare");
         Scanner scanner = new Scanner(System.in);
         int option_productions = 0;
         boolean valid_productions = false;
@@ -2006,9 +2020,301 @@ public class CLI {
                 Production production = productions.get(productionIndex - 1);
                 showProductionDetails(production);
                 break;
+            case 3:
+                // vizualizare optiuni de filtrare
+                filterProductions();
+                break;
             default:
                 System.out.println("Opțiune invalidă!");
                 showProductions();
+        }
+    }
+
+    private void filterProductions() {
+        System.out.println("Alege un filtru:");
+        System.out.println("1. Filtru după gen");
+        System.out.println("2. Filtru dupa tip (movie/series)");
+        System.out.println("3. Filtru după actor");
+        System.out.println("4. Filtru după rating (minim)");
+        System.out.println("5. Filtru după durata (maxima)");
+        System.out.println("6. Filtru dupa anul de aparitie (minim)");
+        System.out.println("7. Filtru dupa numarul de sezoane (maxim)");
+        System.out.println("8. Filtru dupa numarul de episoade (minim)");
+        System.out.println("9. Filtru dupa numarul de review-uri (minim)");
+        System.out.println("10. Inapoi");
+        Scanner scanner = new Scanner(System.in);
+        int option_filter = 0;
+        boolean valid_filter = false;
+        while (!valid_filter) {
+            try {
+                option_filter = scanner.nextInt();
+                valid_filter = true;
+            } catch (Exception e) {
+                System.out.println("Opțiune invalidă!");
+                scanner.nextLine();
+            }
+        }
+        List<Production> filteredProductions = imdb.getProductionList();
+        switch (option_filter) {
+            case 1:
+                // pentru filtru dupa gen am nevoie sa
+                // arat toate genurile si sa pun user-ul sa aleaga unul
+                // pentru a nu avea probleme cu case sensitive sau etc
+                System.out.println("Alege un gen:");
+                int index = 1;
+                for (Genre genre : Genre.values()) {
+                    System.out.println(index + ". " + genre);
+                    index++;
+                }
+                int option_genre = 0;
+                boolean valid_genre = false;
+                while (!valid_genre) {
+                    try {
+                        option_genre = scanner.nextInt();
+                        valid_genre = true;
+                    } catch (Exception e) {
+                        System.out.println("Opțiune invalidă!");
+                        scanner.nextLine();
+                    }
+                }
+                if (option_genre < 1 || option_genre > Genre.values().length) {
+                    System.out.println("Opțiune invalidă!");
+                    filterProductions();
+                    return;
+                }
+                Genre selected_genre = Genre.values()[option_genre - 1];
+                filteredProductions = imdb.filterByGenre(selected_genre.toString(), filteredProductions);
+                showFilteredProductions(filteredProductions);
+                break;
+            case 2:
+                // vreau sa afisez toate tipurile de productii
+                // si sa pun user-ul sa aleaga unul
+                System.out.println("Alege un tip:");
+                System.out.println("1. Movie");
+                System.out.println("2. Series");
+                int option_type = 0;
+                boolean valid_type = false;
+                while (!valid_type) {
+                    try {
+                        option_type = scanner.nextInt();
+                        valid_type = true;
+                    } catch (Exception e) {
+                        System.out.println("Opțiune invalidă!");
+                        scanner.nextLine();
+                    }
+                }
+                if (option_type < 1 || option_type > 2) {
+                    System.out.println("Opțiune invalidă!");
+                    filterProductions();
+                    return;
+                }
+                if (option_type == 1) {
+                    filteredProductions = imdb.filterByType("Movie", filteredProductions);
+                    showFilteredProductions(filteredProductions);
+                } else {
+                    filteredProductions = imdb.filterByType("Series", filteredProductions);
+                    showFilteredProductions(filteredProductions);
+                }
+                break;
+            case 3:
+                // vreau sa afisez toti actorii
+                // si sa pun user-ul sa aleaga unul
+                List<Actor> actors = imdb.getActorList();
+                Collections.sort(actors, (a1, a2) -> a1.getName().compareToIgnoreCase(a2.getName()));
+                System.out.println("Alege un actor:");
+                for (int i = 0; i < actors.size(); i++) {
+                    System.out.println((i + 1) + ". " + actors.get(i).getName());
+                }
+                int option_actor = 0;
+                boolean valid_actor = false;
+                while (!valid_actor) {
+                    try {
+                        option_actor = scanner.nextInt();
+                        valid_actor = true;
+                    } catch (Exception e) {
+                        System.out.println("Opțiune invalidă!");
+                        scanner.nextLine();
+                    }
+                }
+                if (option_actor < 1 || option_actor > actors.size()) {
+                    System.out.println("Opțiune invalidă!");
+                    filterProductions();
+                    return;
+                }
+                Actor selected_actor = actors.get(option_actor - 1);
+                filteredProductions = imdb.filterByActorP(selected_actor.getName(), filteredProductions);
+                showFilteredProductions(filteredProductions);
+                break;
+            case 4:
+                // vreau sa pun user-ul sa introduca un rating minim
+                System.out.println("Rating minim:");
+                int rating_min = 0;
+                boolean valid_rating_min = false;
+                while (!valid_rating_min) {
+                    try {
+                        rating_min = scanner.nextInt();
+                        valid_rating_min = true;
+                    } catch (Exception e) {
+                        System.out.println("Opțiune invalidă!");
+                        scanner.nextLine();
+                    }
+                }
+                filteredProductions = imdb.filterByRating(rating_min, filteredProductions);
+                showFilteredProductions(filteredProductions);
+                break;
+            case 5:
+                // vreau sa pun user-ul sa introduca o durata maxima
+                System.out.println("Durata maxima:");
+                int durata_max = 0;
+                boolean valid_durata_max = false;
+                while (!valid_durata_max) {
+                    try {
+                        durata_max = scanner.nextInt();
+                        valid_durata_max = true;
+                    } catch (Exception e) {
+                        System.out.println("Opțiune invalidă!");
+                        scanner.nextLine();
+                    }
+                }
+                filteredProductions = imdb.filterByDuration(durata_max, filteredProductions);
+                showFilteredProductions(filteredProductions);
+                break;
+            case 6:
+                // vreau sa pun user-ul sa introduca un an minim
+                System.out.println("An minim:");
+                int an_min = 0;
+                boolean valid_an_min = false;
+                while (!valid_an_min) {
+                    try {
+                        an_min = scanner.nextInt();
+                        valid_an_min = true;
+                    } catch (Exception e) {
+                        System.out.println("Opțiune invalidă!");
+                        scanner.nextLine();
+                    }
+                }
+                filteredProductions = imdb.filterByReleaseYear(an_min, filteredProductions);
+                showFilteredProductions(filteredProductions);
+                break;
+            case 7:
+                // vreau sa pun user-ul sa introduca un numar maxim de sezoane
+                System.out.println("Numar maxim de sezoane:");
+                int sezoane_max = 0;
+                boolean valid_sezoane_max = false;
+                while (!valid_sezoane_max) {
+                    try {
+                        sezoane_max = scanner.nextInt();
+                        valid_sezoane_max = true;
+                    } catch (Exception e) {
+                        System.out.println("Opțiune invalidă!");
+                        scanner.nextLine();
+                    }
+                }
+                filteredProductions = imdb.filterByNumberOfSeasons(sezoane_max, filteredProductions);
+                showFilteredProductions(filteredProductions);
+                break;
+            case 8:
+                // vreau sa pun user-ul sa introduca un numar minim de episoade
+                System.out.println("Numar minim de episoade:");
+                int episoade_min = 0;
+                boolean valid_episoade_min = false;
+                while (!valid_episoade_min) {
+                    try {
+                        episoade_min = scanner.nextInt();
+                        valid_episoade_min = true;
+                    } catch (Exception e) {
+                        System.out.println("Opțiune invalidă!");
+                        scanner.nextLine();
+                    }
+                }
+                filteredProductions = imdb.filterByNumberOfEpisodes(episoade_min, filteredProductions);
+                showFilteredProductions(filteredProductions);
+                break;
+            case 9:
+                // vreau sa pun user-ul sa introduca un numar minim de review-uri
+                System.out.println("Numar minim de review-uri:");
+                int review_min = 0;
+                boolean valid_review_min = false;
+                while (!valid_review_min) {
+                    try {
+                        review_min = scanner.nextInt();
+                        valid_review_min = true;
+                    } catch (Exception e) {
+                        System.out.println("Opțiune invalidă!");
+                        scanner.nextLine();
+                    }
+                }
+                filteredProductions = imdb.filterByMinimumReviews(review_min, filteredProductions);
+                showFilteredProductions(filteredProductions);
+                break;
+            case 10:
+                // Inapoi
+                showProductions();
+                break;
+        }
+    }
+
+    private void showFilteredProductions(List<Production> filteredProductions){
+        if (filteredProductions.isEmpty()){
+            System.out.println("Nu exista productii care sa corespunda criteriilor de filtrare!");
+            showProductions();
+            return;
+        } else {
+            Collections.sort(filteredProductions, (p1, p2) -> p1.getTitlu().compareToIgnoreCase(p2.getTitlu()));
+            System.out.println("Lista de producții:");
+            for (int i = 0; i < filteredProductions.size(); i++) {
+                System.out.println((i + 1) + ". " + filteredProductions.get(i).getTitlu());
+            }
+            System.out.println("Alege o optiune:");
+            System.out.println("1. Inapoi la meniul principal");
+            System.out.println("2. Inapoi la toate producțiile");
+            System.out.println("3. Vizualizare detalii producție");
+            Scanner scanner = new Scanner(System.in);
+            int option_productions = 0;
+            boolean valid_productions = false;
+            while (!valid_productions) {
+                try {
+                    option_productions = scanner.nextInt();
+                    valid_productions = true;
+                } catch (Exception e) {
+                    System.out.println("Opțiune invalidă!");
+                    scanner.nextLine();
+                }
+            }
+            switch (option_productions) {
+                case 1:
+                    // Inapoi la meniul principal
+                    showMainMenu();
+                    break;
+                case 2:
+                    // Inapoi la toate producțiile
+                    showProductions();
+                    break;
+                case 3:
+                    // Vizualizare detalii producție
+                    System.out.println("Alege o producție:");
+                    int productionIndex = 0;
+                    boolean valid_production = false;
+                    while (!valid_production) {
+                        try {
+                            productionIndex = scanner.nextInt();
+                            valid_production = true;
+                        } catch (Exception e) {
+                            System.out.println("Opțiune invalidă!");
+                            scanner.nextLine();
+                        }
+                    }
+                    if (productionIndex < 1 || productionIndex > filteredProductions.size()) {
+                        System.out.println("Opțiune invalidă!");
+                        showFilteredProductions(filteredProductions);
+                    }
+                    Production production = filteredProductions.get(productionIndex - 1);
+                    showProductionDetails(production);
+                    break;
+                default:
+                    System.out.println("Opțiune invalidă!");
+                    showFilteredProductions(filteredProductions);
+            }
         }
     }
 

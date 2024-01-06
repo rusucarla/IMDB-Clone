@@ -14,6 +14,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.TreeSet;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 // singleton pattern pentru IMDB
@@ -57,17 +59,6 @@ public class IMDB {
             File actorsFile = new File(actorsPath);
             this.actorList = objectMapper.readValue(actorsFile, new TypeReference<List<Actor>>() {
             });
-            // Afișează informațiile despre actori
-//            System.out.println("Actors:");
-//            for (Actor actor : actorList) {
-//                System.out.println("Name: " + actor.getName());
-//                System.out.println("Biography: " + actor.getBiography());
-//                System.out.println("Performances:");
-//                for (Actor.Performance performance : actor.getPerformances()) {
-//                    System.out.println("  Title: " + performance.getTitle() + ", Type: " + performance.getType());
-//                }
-//                System.out.println();
-//            }
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -93,34 +84,6 @@ public class IMDB {
                     seriesList.add((Series) production);
                 }
             }
-//             afiseaza lista de filme
-//            System.out.println("Movies:");
-//            for (Movie movie : moviesList) {
-//                movie.displayInfo();
-//            }
-//            // afiseaza lista de seriale
-//            System.out.println("Series:");
-//            for (Series series : seriesList) {
-//                series.displayInfo();
-//            }
-//            System.out.println("Productions:");
-//            for (Production production : productionList) {
-//                System.out.println("Title: " + production.getTitlu());
-//                System.out.println("Actors:");
-//                for (String actor : production.getActoriList()) {
-//                    System.out.println("  Name: " + actor);
-//                }
-//                System.out.println("Directors:");
-//                for (String director : production.getRegizoriList()) {
-//                    System.out.println("  Name: " + director);
-//                }
-//                System.out.println("Genres:");
-//                for (String genre : production.getGenreList()) {
-//                    System.out.println("  Name: " + genre);
-//                }
-//                System.out.println("Description: " + production.getDescriereFilm());
-//                System.out.println("Rating: " + production.getNotaFilm());
-//            }
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -148,27 +111,18 @@ public class IMDB {
                 JSONObject informationObject = (JSONObject) userObject.get("information");
                 JSONObject credentialsObject = (JSONObject) informationObject.get("credentials");
                 String email = (String) credentialsObject.get("email");
-//                System.out.println("EMAIL: " + email);
                 String password = (String) credentialsObject.get("password");
-//                System.out.println("PASSWORD: " + password);
                 Credentials credentials = new Credentials(email, password);
                 String name = (String) informationObject.get("name");
-//                System.out.println(name);
                 String country = (String) informationObject.get("country");
-//                System.out.println("COUNTRY: " + country);
                 String gender = (String) informationObject.get("gender");
-//                System.out.println("GENDER: " + gender);
-
-//                LocalDateTime birthDate = LocalDateTime.parse((String) userObject.get("birthDate"));
                 String birthDateStr = (String) informationObject.get("birthDate");
                 LocalDate birthDate = null;
                 String pattern = "yyyy-MM-dd";
                 DateTimeFormatter customFormatter = DateTimeFormatter.ofPattern(pattern);
                 if (birthDateStr != null) {
                     birthDate = LocalDate.parse(birthDateStr, customFormatter);
-//                    System.out.println("BIRTHDATE: " + birthDate);
                 }
-//                Integer age = ((Long) userObject.get("age")).intValue();
                 Object ageObj = informationObject.get("age");
                 Integer age = null;
                 if (ageObj != null) {
@@ -478,12 +432,66 @@ public class IMDB {
     }
 
     public List<Production> filterByDuration(int duration, List<Production> filteredProductions) {
-        // vreau filmele care au durata <= duration
-        // trebuie sa transform getRunTimp in int
-        // p instanceof Movie
         return filteredProductions.stream()
                 .filter(p -> p instanceof Movie)
-                .filter(p -> Integer.parseInt(((Movie) p).getRunTimp()) <= duration)
+                .filter(p -> {
+                    try {
+                        String runTime = ((Movie) p).getRunTimp();
+                        // Folosește o expresie regulată pentru a extrage numărul de la începutul șirului
+                        Matcher matcher = Pattern.compile("^\\d+").matcher(runTime);
+                        if (matcher.find()) {
+                            // Converteste primul grup într-un int
+                            int movieDuration = Integer.parseInt(matcher.group());
+                            return movieDuration <= duration;
+                        }
+                        return false; // Dacă nu se găsește un număr la începutul șirului, exclude filmul
+                    } catch (NumberFormatException e) {
+                        return false; // nu ma intereseaza filmele care nu au durata
+                    }
+                })
                 .collect(Collectors.toList());
     }
+
+    public List<Production> filterByNumberOfSeasons(int maxSeasons, List<Production> filteredProductions) {
+        return filteredProductions.stream()
+                // Filtrează pentru a include doar instanțele de Series
+                .filter(p -> p instanceof Series)
+                // Filtrează în continuare pe baza numărului de sezoane
+                .filter(p -> ((Series) p).getNumarSezoane() <= maxSeasons)
+                .collect(Collectors.toList());
+    }
+    public List<Production> filterByMinimumReviews(int minReviews, List<Production> filteredProductions) {
+        return filteredProductions.stream()
+                // Filtrează producțiile care au un număr minim de review-uri
+                .filter(p -> p.getRatingList().size() >= minReviews)
+                .collect(Collectors.toList());
+    }
+    public List<Production> filterByNumberOfEpisodes(int minEpisodes, List<Production> filteredProductions) {
+        return filteredProductions.stream()
+                // Filtrează doar producțiile care sunt instanțe ale Series
+                .filter(p -> p instanceof Series)
+                // Filtrează serialele care au un număr total de episoade mai mare sau egal cu minEpisodes
+                .filter(series -> {
+                    Series s = (Series) series;
+                    int totalEpisodes = s.getMapSerial().values().stream()
+                            .mapToInt(List::size) // Converteste fiecare lista de episoade in dimensiunea ei
+                            .sum(); // Suma tuturor episoadelor din toate sezoanele
+                    return totalEpisodes >= minEpisodes;
+                })
+                .collect(Collectors.toList());
+    }
+    public List<Production> filterByReleaseYear(int minYear, List<Production> productions) {
+        return productions.stream()
+                .filter(p -> {
+                    if (p instanceof Movie) {
+                        return ((Movie) p).getReleaseAn() >= minYear;
+                    } else if (p instanceof Series) {
+                        return ((Series) p).getReleaseAn() >= minYear;
+                    }
+                    return false;
+                })
+                .collect(Collectors.toList());
+    }
+
+
 }

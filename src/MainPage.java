@@ -110,13 +110,13 @@ public class MainPage extends JFrame {
         addUserPanel.add(new JLabel("Nume: "));
         addUserPanel.add(numeField);
         JTextField birthDateField = new JTextField();
-        addUserPanel.add(new JLabel("Data nasterii: "));
+        addUserPanel.add(new JLabel("Data nasterii: Exemplu: 2000-12-22"));
         addUserPanel.add(birthDateField);
         JTextField countryField = new JTextField();
         addUserPanel.add(new JLabel("Tara: "));
         addUserPanel.add(countryField);
         JTextField genderField = new JTextField();
-        addUserPanel.add(new JLabel("Gen: "));
+        addUserPanel.add(new JLabel("Gen: Female/Male"));
         addUserPanel.add(genderField);
         JComboBox<AccountType> accountTypeComboBox = new JComboBox<>(AccountType.values());
         addUserPanel.add(new JLabel("Tip cont: "));
@@ -143,6 +143,11 @@ public class MainPage extends JFrame {
                 LocalDate.parse(birthDate);
             } catch (Exception exception) {
                 JOptionPane.showMessageDialog(this, "Data nasterii nu este valida!");
+                return;
+            }
+            // verific sa fie gender-ul corect
+            if (!gender.equals("Female") && !gender.equals("Male")){
+                JOptionPane.showMessageDialog(this, "Genul nu este valid!");
                 return;
             }
             // generez username-ul si parola
@@ -1743,9 +1748,18 @@ public class MainPage extends JFrame {
         if (selectedActor.getRatingList() == null || selectedActor.getRatingList().isEmpty()) {
             ratingModel.addElement("Nu exista review-uri pentru acest actor!");
         } else {
-            for (Rating rating : selectedActor.getRatingList()) {
-                ratingModel.addElement(rating.getUsernameRater() + " - " + rating.getNotaRating() + " - " + rating.getComentariiRater());
-            }
+            Runnable loadRatings = () -> {
+                selectedActor.getRatingList().sort((r1, r2) -> {
+                    User user1 = IMDB.getInstance().getUser(r1.getUsernameRater());
+                    User user2 = IMDB.getInstance().getUser(r2.getUsernameRater());
+                    return Integer.compare(user2.getExperience(), user1.getExperience());
+                });
+                ratingModel.clear();
+                for (Rating rating : selectedActor.getRatingList()) {
+                    ratingModel.addElement(rating.getUsernameRater() + " - " + rating.getNotaRating() + " - " + rating.getComentariiRater());
+                }
+            };
+            loadRatings.run();
         }
         JList<String> ratingList = new JList<>(ratingModel);
         ratingList.setBorder(BorderFactory.createTitledBorder("Reviews"));
@@ -2025,7 +2039,6 @@ public class MainPage extends JFrame {
                 }
             }
         }
-
         detailsDialog.add(buttonPanel, BorderLayout.SOUTH);
         detailsDialog.setVisible(true);
         detailsDialog.revalidate();
@@ -2054,7 +2067,14 @@ public class MainPage extends JFrame {
         JPanel homePagePanel = new JPanel(new BorderLayout());
 
         // Adaugă zona de filtrare
-        JPanel filterPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        JPanel filterPanel = new JPanel();
+        filterPanel.setLayout(new BoxLayout(filterPanel, BoxLayout.Y_AXIS));
+        JPanel rand1 = new JPanel();
+        rand1.setLayout(new BoxLayout(rand1, BoxLayout.X_AXIS));
+        JPanel rand2 = new JPanel();
+        rand2.setLayout(new BoxLayout(rand2, BoxLayout.X_AXIS));
+        filterPanel.add(rand1);
+        filterPanel.add(rand2);
         JTextField searchField = new JTextField(20);
         JButton searchButton = new JButton("Caută");
         JComboBox<Genre> genreComboBox = new JComboBox<>(Genre.values());
@@ -2079,18 +2099,38 @@ public class MainPage extends JFrame {
             }
         });
         JTextField ratingField = new JTextField(5);
-        ratingField.setMaximumSize(new Dimension(50, 20));
-        filterPanel.add(searchField);
-        filterPanel.add(genreComboBox);
-        filterPanel.add(typeProductionComboBox);
-        filterPanel.add(actorComboBox);
-        filterPanel.add(new JLabel("Rating minim:"));
-        filterPanel.add(ratingField);
-        filterPanel.add(searchButton);
+        ratingField.setMaximumSize(new Dimension(40, 20));
+        rand1.add(searchField);
+        rand1.add(genreComboBox);
+        rand1.add(typeProductionComboBox);
+        rand1.add(actorComboBox);
+        rand1.add(new JLabel("Rating minim:"));
+        rand1.add(ratingField);
+        rand2.add(new JLabel("Durata maxima:"));
+        JTextField durationField = new JTextField(5);
+        durationField.setMaximumSize(new Dimension(40, 20));
+        rand2.add(durationField);
+        JTextField numberofseasonsField = new JTextField(5);
+        numberofseasonsField.setMaximumSize(new Dimension(40, 20));
+        rand2.add(new JLabel("Numar maxim de sezoane:"));
+        rand2.add(numberofseasonsField);
+        JTextField numberofreviewsField = new JTextField(5);
+        numberofreviewsField.setMaximumSize(new Dimension(40, 20));
+        rand2.add(new JLabel("Numar minim de review-uri:"));
+        rand2.add(numberofreviewsField);
+        JTextField numberofepisodesField = new JTextField(5);
+        numberofepisodesField.setMaximumSize(new Dimension(40, 20));
+        rand2.add(new JLabel("Numar minim de episoade:"));
+        rand2.add(numberofepisodesField);
+        JTextField releaseanField = new JTextField(5);
+        releaseanField.setMaximumSize(new Dimension(40, 20));
+        rand2.add(new JLabel("Anul lansarii:"));
+        rand2.add(releaseanField);
+        rand1.add(searchButton);
         productionListModel = new DefaultListModel<>();
         JList<Production> productionList = new JList<>(productionListModel);
-        JButton resetFiltersButton = new JButton("Refresh");
-        filterPanel.add(resetFiltersButton);
+        JButton resetFiltersButton = new JButton("Reset");
+        rand1.add(resetFiltersButton);
 
         resetFiltersButton.addActionListener(e -> {
             List<Production> initialProductions = imdb.getProductionList();
@@ -2106,6 +2146,17 @@ public class MainPage extends JFrame {
                 productionListModel.addElement(production);
             }
             productionList.setModel(productionListModel);
+            // resetez si filtrele
+            searchField.setText("");
+            genreComboBox.setSelectedIndex(0);
+            typeProductionComboBox.setSelectedIndex(0);
+            actorComboBox.setSelectedIndex(0);
+            ratingField.setText("");
+            durationField.setText("");
+            numberofseasonsField.setText("");
+            numberofreviewsField.setText("");
+            numberofepisodesField.setText("");
+            releaseanField.setText("");
         });
 
         // Adaugă listener pentru butonul de căutare
@@ -2115,8 +2166,12 @@ public class MainPage extends JFrame {
             String selectedType = (String) typeProductionComboBox.getSelectedItem();
             Actor selectedActorName = (Actor) actorComboBox.getSelectedItem();
             List<Production> filteredProductions = imdb.getProductionList();
-            String ratingText = ratingField.getText();
-            // Altfel, afișează producțiile care corespund criteriilor
+            String ratingText = ratingField.getText().trim();
+            String durationText = durationField.getText().trim();
+            String numberofseasonsText = numberofseasonsField.getText().trim();
+            String numberofreviewsText = numberofreviewsField.getText().trim();
+            String numberofepisodesText = numberofepisodesField.getText().trim();
+            String releaseanText = releaseanField.getText().trim();
             try {
                 if (!ratingText.isEmpty()) {
                     double rating = Double.parseDouble(ratingText);
@@ -2137,6 +2192,47 @@ public class MainPage extends JFrame {
             }
             if (selectedActorName != null && !selectedActorName.getName().equals("Oricine")) {
                 filteredProductions = imdb.filterByActorP(selectedActorName.getName(), filteredProductions);
+            }
+            try {
+                if(!durationText.isEmpty()){
+                    int duration = Integer.parseInt(durationText);
+                    filteredProductions = imdb.filterByDuration(duration, filteredProductions);
+                }
+            } catch (NumberFormatException ex1) {
+                JOptionPane.showMessageDialog(this, "Durata trebuie să fie un număr! Pune un număr sau lasă câmpul gol!");
+
+            }
+            try {
+                if(!numberofseasonsText.isEmpty()){
+                    int numberofseasons = Integer.parseInt(numberofseasonsText);
+                    filteredProductions = imdb.filterByNumberOfSeasons(numberofseasons, filteredProductions);
+                }
+            } catch (NumberFormatException ex2) {
+                JOptionPane.showMessageDialog(this, "Numarul de sezoane trebuie să fie un număr! Pune un număr sau lasă câmpul gol!");
+            }
+            try {
+                if(!numberofreviewsText.isEmpty()){
+                    int numberofreviews = Integer.parseInt(numberofreviewsText);
+                    filteredProductions = imdb.filterByMinimumReviews(numberofreviews, filteredProductions);
+                }
+            } catch (NumberFormatException ex3) {
+                JOptionPane.showMessageDialog(this, "Numarul de review-uri trebuie să fie un număr! Pune un număr sau lasă câmpul gol!");
+            }
+            try {
+                if(!numberofepisodesText.isEmpty()){
+                    int numberofepisodes = Integer.parseInt(numberofepisodesText);
+                    filteredProductions = imdb.filterByNumberOfEpisodes(numberofepisodes, filteredProductions);
+                }
+            } catch (NumberFormatException ex4) {
+                JOptionPane.showMessageDialog(this, "Numarul de episoade trebuie să fie un număr! Pune un număr sau lasă câmpul gol!");
+            }
+            try {
+                if(!releaseanText.isEmpty()){
+                    int releasean = Integer.parseInt(releaseanText);
+                    filteredProductions = imdb.filterByReleaseYear(releasean, filteredProductions);
+                }
+            } catch (NumberFormatException ex5) {
+                JOptionPane.showMessageDialog(this, "Anul de lansare trebuie să fie un număr! Pune un număr sau lasă câmpul gol!");
             }
             productionListModel.clear();
             for (Production production : filteredProductions) {
@@ -2309,7 +2405,7 @@ public class MainPage extends JFrame {
             textPanel.add(new JLabel("Numar Sezoane: " + ((Series) selectedproduction).getNumarSezoane()));
         } else {
             // add runtime and release year to the text panel
-            textPanel.add(new JLabel("Durata: " + ((Movie) selectedproduction).getRunTimp() + " minute"));
+            textPanel.add(new JLabel("Durata: " + ((Movie) selectedproduction).getRunTimp()));
             textPanel.add(new JLabel("An Lansare: " + ((Movie) selectedproduction).getReleaseAn()));
         }
         JTextArea descriptionArea = new JTextArea(5, 20); // 5 rows, 20 columns
@@ -2823,21 +2919,9 @@ public class MainPage extends JFrame {
                                     staff.updateProduction(series);
                                     Series selectedseries = (Series) selectedproduction;
                                     selectedseries.setMapSerial(mapSerial);
-                                    //afisez lista de productii
-//                                productionListModel.clear();
-//                                List<Production> initialProductions = imdb.getProductionList();
-//                                for (Production production1 : initialProductions) {
-//                                    productionListModel.addElement(production1);
-//                                }
                                 } else {
                                     staff.removeProductionSystem(selectedproduction.getTitlu());
                                     staff.addProductionSystem(series);
-//                                //afisez lista de productii
-//                                productionListModel.clear();
-//                                List<Production> initialProductions = imdb.getProductionList();
-//                                for (Production production1 : initialProductions) {
-//                                    productionListModel.addElement(production1);
-//                                }
                                 }
                             }
                             // inchid fereastra de modificare
@@ -2869,7 +2953,6 @@ public class MainPage extends JFrame {
                 buttonPanel.add(modifyButton);
             }
         }
-//        detailsDialog.add(buttonPanel, BorderLayout.SOUTH);
         JButton refreshButton = new JButton("Refresh Ratings");
         refreshButton.addActionListener(e -> {
             // Reîncarcă rating-urile și actualizează lista
@@ -2879,7 +2962,6 @@ public class MainPage extends JFrame {
         });
         buttonPanel.add(refreshButton);
         JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, ratingScrollPane, buttonPanel);
-//        splitPane.setResizeWeight(0.5);
         detailsDialog.add(splitPane, BorderLayout.SOUTH);
         detailsDialog.setVisible(true);
         detailsDialog.revalidate();

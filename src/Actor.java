@@ -84,6 +84,13 @@ public class Actor implements Comparable<Actor>, Subject{
             ratingList = new ArrayList<>();
         this.ratingList.add(rating);
         calculNota();
+        // vreau sa sortez lista de rating-uri in functie de exp-ul userilor
+        this.ratingList.sort((o1, o2) -> {
+            User user1 = IMDB.getInstance().getUser(o1.getUsernameRater());
+            User user2 = IMDB.getInstance().getUser(o2.getUsernameRater());
+            // sortez descrescator
+            return Integer.compare(user2.getExperience(), user1.getExperience());
+        });
         // vreau sa adaug si utilizatorul care a dat rating ca observer
         User user = IMDB.getInstance().getUser(rating.getUsernameRater());
         addObserver(user);
@@ -121,6 +128,13 @@ public class Actor implements Comparable<Actor>, Subject{
                 break;
             }
         }
+        // vreau sa sortez lista de rating-uri in functie de exp-ul userilor
+        this.ratingList.sort((o1, o2) -> {
+            User user1 = IMDB.getInstance().getUser(o1.getUsernameRater());
+            User user2 = IMDB.getInstance().getUser(o2.getUsernameRater());
+            // sortez descrescator
+            return Integer.compare(user2.getExperience(), user1.getExperience());
+        });
     }
 
     @Override
@@ -141,6 +155,13 @@ public class Actor implements Comparable<Actor>, Subject{
             return;
         }
         System.out.println("Ratings: ");
+        // vreau sa sortez lista de rating-uri in functie de exp-ul userilor
+        this.ratingList.sort((o1, o2) -> {
+            User user1 = IMDB.getInstance().getUser(o1.getUsernameRater());
+            User user2 = IMDB.getInstance().getUser(o2.getUsernameRater());
+            // sortez descrescator
+            return Integer.compare(user2.getExperience(), user1.getExperience());
+        });
         for (Rating rating : this.getRatingList()) {
             System.out.println(rating.getUsernameRater() + " - " + rating.getNotaRating() + " - " + rating.getComentariiRater());
         }

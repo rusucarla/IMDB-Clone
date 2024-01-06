@@ -25,13 +25,7 @@ public class RequestsHolder {
 
     public static void stergeCerere(Request cerere) {
         synchronized (listaCereri) {
-            System.out.println("Înainte de ștergere: " + listaCereri);
             listaCereri.remove(cerere);
-            System.out.println("Cerere stearsa");
-            System.out.println("După ștergere: " + listaCereri);
         }
     }
-
-    // Alte metode pentru gestionarea listei de cereri, dacă este necesar
-    // ...
 }

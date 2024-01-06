@@ -50,6 +50,12 @@ public class Movie extends Production {
         // afisare rating
         if (this.ratingList != null) {
             System.out.println("Rating: ");
+            this.ratingList.sort((o1, o2) -> {
+                User user1 = IMDB.getInstance().getUser(o1.getUsernameRater());
+                User user2 = IMDB.getInstance().getUser(o2.getUsernameRater());
+                // sortez descrescator
+                return Integer.compare(user2.getExperience(), user1.getExperience());
+            });
             for (Rating rating : this.ratingList) {
                 System.out.println(rating.getUsernameRater() + " " +
                         rating.getNotaRating() + " " + rating.getComentariiRater());
