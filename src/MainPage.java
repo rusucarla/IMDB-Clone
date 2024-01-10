@@ -1,6 +1,5 @@
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.time.LocalDate;
@@ -146,7 +145,7 @@ public class MainPage extends JFrame {
                 return;
             }
             // verific sa fie gender-ul corect
-            if (!gender.equals("Female") && !gender.equals("Male")){
+            if (!gender.equals("Female") && !gender.equals("Male")) {
                 JOptionPane.showMessageDialog(this, "Genul nu este valid!");
                 return;
             }
@@ -696,6 +695,335 @@ public class MainPage extends JFrame {
         return accountPagePanel;
     }
 
+    private void createMovieDialog(User user) {
+        JDialog movieDialog = new JDialog();
+        JPanel contentPane = new JPanel(new GridLayout(0, 1));
+        JTextField titleField = new JTextField();
+        contentPane.add(new JLabel("Titlu: "));
+        contentPane.add(titleField);
+        JTextField yearField = new JTextField();
+        contentPane.add(new JLabel("An Lansare: Trebuie pus un numar"));
+        contentPane.add(yearField);
+        JTextField durationField = new JTextField();
+        contentPane.add(new JLabel("Durata: Trebuie pus un numar"));
+        contentPane.add(durationField);
+        JTextArea regizorArea = new JTextArea(5, 20); // 5 rows, 20 columns
+        regizorArea.setWrapStyleWord(true);
+        regizorArea.setLineWrap(true);
+        regizorArea.setCaretPosition(0);
+        regizorArea.setEditable(true);
+        contentPane.add(new JLabel("Regizor: Trebuie pus un regizor pe linie."));
+        JScrollPane regizorScrollPane = new JScrollPane(regizorArea);
+        contentPane.add(regizorScrollPane);
+        JTextArea actorsArea = new JTextArea(5, 20); // 5 rows, 20 columns
+        actorsArea.setWrapStyleWord(true);
+        actorsArea.setLineWrap(true);
+        actorsArea.setCaretPosition(0);
+        actorsArea.setEditable(true);
+        contentPane.add(new JLabel("Actori: Trebuie pus un actor pe linie."));
+        JScrollPane actorsScrollPane = new JScrollPane(actorsArea);
+        contentPane.add(actorsScrollPane);
+        JTextArea genresArea = new JTextArea(5, 20); // 5 rows, 20 columns
+        genresArea.setWrapStyleWord(true);
+        genresArea.setLineWrap(true);
+        genresArea.setCaretPosition(0);
+        genresArea.setEditable(true);
+        contentPane.add(new JLabel("Genuri: Trebuie pus un gen pe linie."));
+        JScrollPane genresScrollPane = new JScrollPane(genresArea);
+        contentPane.add(genresScrollPane);
+        JTextArea descriptionArea = new JTextArea(5, 20); // 5 rows, 20 columns
+        descriptionArea.setWrapStyleWord(true);
+        descriptionArea.setLineWrap(true);
+        descriptionArea.setCaretPosition(0);
+        descriptionArea.setEditable(true);
+        contentPane.add(new JLabel("Descriere: "));
+        JScrollPane descriptionScrollPane = new JScrollPane(descriptionArea);
+        contentPane.add(descriptionScrollPane);
+        // vreaun un buton pentru a salva filmul
+        JButton saveButton = new JButton("Salveaza");
+        contentPane.add(saveButton);
+        // adaug un listener pentru butonul de save
+        saveButton.addActionListener(e4 -> {
+            // vreau mai intai sa verific validitatea datelor de pana acum
+            if (titleField.getText().isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Titlul nu poate fi gol!");
+                return;
+            }
+            try {
+                int year = Integer.parseInt(yearField.getText());
+                // verific daca anul este mai mare ca 0
+                if (year <= 0) {
+                    JOptionPane.showMessageDialog(this, "Anul trebuie sa fie mai mare ca 0!");
+                    return;
+                }
+            } catch (NumberFormatException ex) {
+                JOptionPane.showMessageDialog(this, "Anul trebuie sa fie un numar!");
+                return;
+            }
+            // verific daca regizorul exista
+            if (regizorArea.getText().isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Productia trebuie sa aiba macar un regizor!");
+                return;
+            }
+            // verific daca actorii exista
+            if (actorsArea.getText().isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Productia trebuie sa aiba macar un actor!");
+                return;
+            }
+            // verific daca genurile exista
+            if (genresArea.getText().isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Productia trebuie sa aiba macar un gen!");
+                return;
+            }
+            // verific daca descrierea exista
+            if (descriptionArea.getText().isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Productia trebuie sa aiba o descriere!");
+                return;
+            }
+            // verific daca durata exista
+            if (durationField.getText().isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Productia trebuie sa aiba o durata!");
+                return;
+            }
+            // verific daca durata este un numar
+            int duration = 0;
+            try {
+                duration = Integer.parseInt(durationField.getText());
+                // verific daca durata este mai mare ca 0
+                if (duration <= 0) {
+                    JOptionPane.showMessageDialog(this, "Durata trebuie sa fie mai mare ca 0!");
+                    return;
+                }
+            } catch (NumberFormatException ex) {
+                JOptionPane.showMessageDialog(this, "Durata trebuie sa fie un numar!");
+                return;
+            }
+            // vreau sa creez producția
+            String title = titleField.getText();
+            // verific daca productia nu exista deja
+            for (Production production : imdb.getProductionList()) {
+                if (production.getTitlu().equals(title)) {
+                    JOptionPane.showMessageDialog(this, "Productia exista deja!");
+                    return;
+                }
+            }
+            int year = Integer.parseInt(yearField.getText());
+            String[] regizori = regizorArea.getText().split("\n");
+            String[] actori = actorsArea.getText().split("\n");
+            String[] genres = genresArea.getText().split("\n");
+            String descriere = descriptionArea.getText();
+            // vreau sa construiesc durata ca "x minutes"
+            String durationString = duration + " minutes";
+            // Contruiesc producția
+            Movie movie = new Movie(title, Arrays.asList(regizori), Arrays.asList(actori),
+                    Arrays.asList(genres), new ArrayList<>(), descriere, durationString, year);
+            // adaug producția
+            Staff staff = (Staff) user;
+            staff.addProductionSystem(movie);
+            // adaug exp-ul userului doar daca nu e admin
+            if (user instanceof Contributor) {
+                user.setExperienceStrategy(new ContributionStrategy());
+                user.updateExperience();
+            }
+            // dau mesaj ca s-a adaugat cu succes
+            JOptionPane.showMessageDialog(this, "Productia a fost adaugata cu succes! Ai primit experienta!");
+        });
+        JScrollPane scrollPane = new JScrollPane(contentPane, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
+                JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+        movieDialog.add(scrollPane);
+        movieDialog.pack();
+        movieDialog.setVisible(true);
+    }
+
+    private void createSeriesDialog(User user) {
+        JDialog seriesDialog = new JDialog();
+        JPanel contentPane = new JPanel(new GridLayout(0, 1));
+        JTextField titleField = new JTextField();
+        contentPane.add(new JLabel("Titlu: "));
+        contentPane.add(titleField);
+        JTextField yearField = new JTextField();
+        contentPane.add(new JLabel("An Lansare: Trebuie pus un numar"));
+        contentPane.add(yearField);
+        JTextField sesonsField = new JTextField();
+        contentPane.add(new JLabel("Numar Sezoane: Trebuie pus un numar"));
+        contentPane.add(sesonsField);
+        JTextArea regizorArea = new JTextArea(5, 20); // 5 rows, 20 columns
+        regizorArea.setWrapStyleWord(true);
+        regizorArea.setLineWrap(true);
+        regizorArea.setCaretPosition(0);
+        regizorArea.setEditable(true);
+        contentPane.add(new JLabel("Regizor: Trebuie pus un regizor pe linie."));
+        JScrollPane regizorScrollPane = new JScrollPane(regizorArea);
+        contentPane.add(regizorScrollPane);
+        JTextArea actorsArea = new JTextArea(5, 20); // 5 rows, 20 columns
+        actorsArea.setWrapStyleWord(true);
+        actorsArea.setLineWrap(true);
+        actorsArea.setCaretPosition(0);
+        actorsArea.setEditable(true);
+        contentPane.add(new JLabel("Actori: Trebuie pus un actor pe linie."));
+        JScrollPane actorsScrollPane = new JScrollPane(actorsArea);
+        contentPane.add(actorsScrollPane);
+        JTextArea genresArea = new JTextArea(5, 20); // 5 rows, 20 columns
+        genresArea.setWrapStyleWord(true);
+        genresArea.setLineWrap(true);
+        genresArea.setCaretPosition(0);
+        genresArea.setEditable(true);
+        contentPane.add(new JLabel("Genuri: Exemplu: Drama, Comedy, Action"));
+        JScrollPane genresScrollPane = new JScrollPane(genresArea);
+        contentPane.add(genresScrollPane);
+        JTextArea descriptionArea = new JTextArea(5, 20); // 5 rows, 20 columns
+        descriptionArea.setWrapStyleWord(true);
+        descriptionArea.setLineWrap(true);
+        descriptionArea.setCaretPosition(0);
+        descriptionArea.setEditable(true);
+        contentPane.add(new JLabel("Descriere: "));
+        JScrollPane descriptionScrollPane = new JScrollPane(descriptionArea);
+        contentPane.add(descriptionScrollPane);
+        // vreau un buton penrtu a continua cu adaugarea producției
+        JButton continueButton = new JButton("Continua");
+        contentPane.add(continueButton);
+        // adaug un listener pentru butonul de continue
+        continueButton.addActionListener(e1 -> {
+            // vreau mai intai sa verific validitatea datelor de pana acum
+            if (titleField.getText().isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Titlul nu poate fi gol!");
+                return;
+            }
+            try {
+                int year = Integer.parseInt(yearField.getText());
+                // verific daca anul este mai mare ca 0
+                if (year <= 0) {
+                    JOptionPane.showMessageDialog(this, "Anul trebuie sa fie mai mare ca 0!");
+                    return;
+                }
+            } catch (NumberFormatException ex) {
+                JOptionPane.showMessageDialog(this, "Anul trebuie sa fie un numar!");
+                return;
+            }
+            // verific daca regizorul exista
+            if (regizorArea.getText().isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Productia trebuie sa aiba macar un regizor!");
+                return;
+            }
+            // verific daca actorii exista
+            if (actorsArea.getText().isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Productia trebuie sa aiba macar un actor!");
+                return;
+            }
+            // verific daca genurile exista
+            if (genresArea.getText().isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Productia trebuie sa aiba macar un gen!");
+                return;
+            }
+            // verific daca descrierea exista
+            if (descriptionArea.getText().isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Productia trebuie sa aiba o descriere!");
+                return;
+            }
+            // vreau sa stiu cate sezoane sunt ca sa stiu cate episoade sa adaug
+            try {
+                int seasons = Integer.parseInt(sesonsField.getText());
+                // verific daca numarul de sezoane este mai mare ca 0
+                if (seasons <= 0) {
+                    JOptionPane.showMessageDialog(this, "Numarul de sezoane trebuie sa fie mai mare ca 0!");
+                    return;
+                }
+                List<JTextArea> episodesAreaList = new ArrayList<>();
+                for (int i = 1; i <= seasons; i++) {
+                    JTextArea episodesArea = new JTextArea(5, 20); // 5 rows, 20 columns
+                    episodesArea.setWrapStyleWord(true);
+                    episodesArea.setLineWrap(true);
+                    episodesArea.setCaretPosition(0);
+                    episodesArea.setEditable(true);
+                    contentPane.add(new JLabel("Episoade sezon " + i + ": "));
+                    episodesAreaList.add(episodesArea);
+                    JScrollPane episodesScrollPane = new JScrollPane(episodesArea);
+                    contentPane.add(episodesScrollPane);
+                }
+                // vreau un buton pentru a continua cu adaugarea producției
+                JButton saveButton = new JButton("Salveaza");
+                contentPane.add(saveButton);
+                // adaug un listener pentru butonul de save
+                saveButton.addActionListener(e2 -> {
+                    // vreau sa creez producția
+                    String title = titleField.getText();
+                    // verific daca productia nu exista deja
+                    for (Production production : imdb.getProductionList()) {
+                        if (production.getTitlu().equals(title)) {
+                            JOptionPane.showMessageDialog(this, "Productia exista deja!");
+                            return;
+                        }
+                    }
+                    int year = Integer.parseInt(yearField.getText());
+                    String[] regizori = regizorArea.getText().split("\n");
+                    String[] actori = actorsArea.getText().split("\n");
+                    String[] genres = genresArea.getText().split("\n");
+                    String descriere = descriptionArea.getText();
+                    int numarSezoane = Integer.parseInt(sesonsField.getText());
+                    Map<String, List<Episode>> mapSerial = new HashMap<>();
+                    for (int i = 1; i <= numarSezoane; i++) {
+                        String[] episodes = episodesAreaList.get(i - 1).getText().split("\n");
+                        List<Episode> episodeList = new ArrayList<>();
+                        for (String episode : episodes) {
+                            String[] episodeDetails = episode.trim().split(" - ");
+                            if (episodeDetails.length != 2) {
+                                // Inform the user about the improperly formatted episode
+                                JOptionPane.showMessageDialog(this, "The episode '" + episode + "' is not formatted correctly. Please use 'Title - Type'.");
+                                return; // Exit the method to prevent further processing
+                            }
+                            String titleEpisode = episodeDetails[0].trim();
+                            String typeEpisode = episodeDetails[1].trim();
+                            if (titleEpisode.isEmpty() || typeEpisode.isEmpty()) {
+                                JOptionPane.showMessageDialog(this, "Title and type cannot be empty.");
+                                return; // Exit the method to prevent further processing
+                            }
+                            // verific tipul episodului - trebuie sa fie de tipul "number minutes"
+                            String[] typeEpisodeDetails = typeEpisode.split(" ");
+                            try {
+                                int number = Integer.parseInt(typeEpisodeDetails[0]);
+                                if (number <= 0) {
+                                    JOptionPane.showMessageDialog(this, "The episode '" + episode + "' is not formatted correctly. Please use 'number minutes'.");
+                                    return; // Exit the method to prevent further processing
+                                }
+                            } catch (NumberFormatException ex) {
+                                JOptionPane.showMessageDialog(this, "The episode'" + episode + "' has to have a valid number of minutes.'");
+                                return; // Exit the method to prevent further processing
+                            }
+                            if (typeEpisodeDetails.length != 2 || !typeEpisodeDetails[1].equals("minutes")) {
+                                JOptionPane.showMessageDialog(this, "The episode '" + episode + "' is not formatted correctly. Please use 'number minutes'.");
+                                return; // Exit the method to prevent further processing
+                            }
+                            episodeList.add(new Episode(titleEpisode, typeEpisode));
+                        }
+                        mapSerial.put("Sezonul " + i, episodeList);
+                    }
+                    // Contruiesc producția
+                    Series series = new Series(title, Arrays.asList(regizori), Arrays.asList(actori),
+                            Arrays.asList(genres), new ArrayList<>(), descriere, year, numarSezoane);
+                    series.setMapSerial(mapSerial);
+                    // adaug producția
+                    Staff staff = (Staff) user;
+                    staff.addProductionSystem(series);
+                    // adaug exp-ul userului
+                    if (user instanceof Contributor) {
+                        user.setExperienceStrategy(new ContributionStrategy());
+                        user.updateExperience();
+                    }
+                    // dau mesaj ca s-a adaugat cu succes
+                    JOptionPane.showMessageDialog(this, "Productia a fost adaugata cu succes! Ai primit experienta!");
+                });
+            } catch (NumberFormatException ex) {
+                JOptionPane.showMessageDialog(this, "Numarul de sezoane trebuie sa fie un numar!");
+                return;
+            }
+        });
+        JScrollPane scrollPane = new JScrollPane(contentPane, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
+                JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+        seriesDialog.add(scrollPane);
+        seriesDialog.pack();
+        seriesDialog.setVisible(true);
+    }
+
     private JPanel createAddProductionPagePanel(String username, String userAccountType) {
         User user = imdb.getUser(username);
         // vreau sa am 2 butoane pentru a sti ce tip de producție vreau sa adaug
@@ -704,537 +1032,12 @@ public class MainPage extends JFrame {
         JButton movieButton = new JButton("Adauga Movie");
         JButton seriesButton = new JButton("Adauga Series (doar unul per login session)");
         // adaug un listener pentru butonul de movie
-        ActionListener seriesButtonListener = e -> {
-            // resetez panelul
-            addProductionPanel.removeAll();
-            addProductionPanel.revalidate();
-            addProductionPanel.repaint();
-            JTextField titleField = new JTextField();
-            addProductionPanel.add(new JLabel("Titlu: "));
-            addProductionPanel.add(titleField);
-            JTextField yearField = new JTextField();
-            addProductionPanel.add(new JLabel("An Lansare: Trebuie pus un numar"));
-            addProductionPanel.add(yearField);
-            JTextField sesonsField = new JTextField();
-            addProductionPanel.add(new JLabel("Numar Sezoane: Trebuie pus un numar"));
-            addProductionPanel.add(sesonsField);
-            JTextArea regizorArea = new JTextArea(5, 20); // 5 rows, 20 columns
-            regizorArea.setWrapStyleWord(true);
-            regizorArea.setLineWrap(true);
-            regizorArea.setCaretPosition(0);
-            regizorArea.setEditable(true);
-            addProductionPanel.add(new JLabel("Regizor: Trebuie pus un regizor pe linie."));
-            JScrollPane regizorScrollPane = new JScrollPane(regizorArea);
-            addProductionPanel.add(regizorScrollPane);
-            JTextArea actorsArea = new JTextArea(5, 20); // 5 rows, 20 columns
-            actorsArea.setWrapStyleWord(true);
-            actorsArea.setLineWrap(true);
-            actorsArea.setCaretPosition(0);
-            actorsArea.setEditable(true);
-            addProductionPanel.add(new JLabel("Actori: Trebuie pus un actor pe linie."));
-            JScrollPane actorsScrollPane = new JScrollPane(actorsArea);
-            addProductionPanel.add(actorsScrollPane);
-            JTextArea genresArea = new JTextArea(5, 20); // 5 rows, 20 columns
-            genresArea.setWrapStyleWord(true);
-            genresArea.setLineWrap(true);
-            genresArea.setCaretPosition(0);
-            genresArea.setEditable(true);
-            addProductionPanel.add(new JLabel("Genuri: Exemplu: Drama, Comedy, Action"));
-            JScrollPane genresScrollPane = new JScrollPane(genresArea);
-            addProductionPanel.add(genresScrollPane);
-            JTextArea descriptionArea = new JTextArea(5, 20); // 5 rows, 20 columns
-            descriptionArea.setWrapStyleWord(true);
-            descriptionArea.setLineWrap(true);
-            descriptionArea.setCaretPosition(0);
-            descriptionArea.setEditable(true);
-            addProductionPanel.add(new JLabel("Descriere: "));
-            JScrollPane descriptionScrollPane = new JScrollPane(descriptionArea);
-            addProductionPanel.add(descriptionScrollPane);
-            // vreau un buton penrtu a continua cu adaugarea producției
-            JButton continueButton = new JButton("Continua");
-            addProductionPanel.add(continueButton);
-            // adaug un listener pentru butonul de continue
-            continueButton.addActionListener(e1 -> {
-                // vreau mai intai sa verific validitatea datelor de pana acum
-                if (titleField.getText().isEmpty()) {
-                    JOptionPane.showMessageDialog(this, "Titlul nu poate fi gol!");
-                    return;
-                }
-                try {
-                    int year = Integer.parseInt(yearField.getText());
-                    // verific daca anul este mai mare ca 0
-                    if (year <= 0) {
-                        JOptionPane.showMessageDialog(this, "Anul trebuie sa fie mai mare ca 0!");
-                        return;
-                    }
-                } catch (NumberFormatException ex) {
-                    JOptionPane.showMessageDialog(this, "Anul trebuie sa fie un numar!");
-                    return;
-                }
-                // verific daca regizorul exista
-                if (regizorArea.getText().isEmpty()) {
-                    JOptionPane.showMessageDialog(this, "Productia trebuie sa aiba macar un regizor!");
-                    return;
-                }
-                // verific daca actorii exista
-                if (actorsArea.getText().isEmpty()) {
-                    JOptionPane.showMessageDialog(this, "Productia trebuie sa aiba macar un actor!");
-                    return;
-                }
-                // verific daca genurile exista
-                if (genresArea.getText().isEmpty()) {
-                    JOptionPane.showMessageDialog(this, "Productia trebuie sa aiba macar un gen!");
-                    return;
-                }
-                // verific daca descrierea exista
-                if (descriptionArea.getText().isEmpty()) {
-                    JOptionPane.showMessageDialog(this, "Productia trebuie sa aiba o descriere!");
-                    return;
-                }
-                // vreau sa stiu cate sezoane sunt ca sa stiu cate episoade sa adaug
-                try {
-                    int seasons = Integer.parseInt(sesonsField.getText());
-                    // verific daca numarul de sezoane este mai mare ca 0
-                    if (seasons <= 0) {
-                        JOptionPane.showMessageDialog(this, "Numarul de sezoane trebuie sa fie mai mare ca 0!");
-                        return;
-                    }
-                    List<JTextArea> episodesAreaList = new ArrayList<>();
-                    for (int i = 1; i <= seasons; i++) {
-                        JTextArea episodesArea = new JTextArea(5, 20); // 5 rows, 20 columns
-                        episodesArea.setWrapStyleWord(true);
-                        episodesArea.setLineWrap(true);
-                        episodesArea.setCaretPosition(0);
-                        episodesArea.setEditable(true);
-                        addProductionPanel.add(new JLabel("Episoade sezon " + i + ": "));
-                        episodesAreaList.add(episodesArea);
-                        JScrollPane episodesScrollPane = new JScrollPane(episodesArea);
-                        addProductionPanel.add(episodesScrollPane);
-                    }
-                    // vreau un buton pentru a continua cu adaugarea producției
-                    JButton saveButton = new JButton("Salveaza");
-                    addProductionPanel.add(saveButton);
-                    // adaug un listener pentru butonul de save
-                    saveButton.addActionListener(e2 -> {
-                        // vreau sa creez producția
-                        String title = titleField.getText();
-                        // verific daca productia nu exista deja
-                        for (Production production : imdb.getProductionList()) {
-                            if (production.getTitlu().equals(title)) {
-                                JOptionPane.showMessageDialog(this, "Productia exista deja!");
-                                return;
-                            }
-                        }
-                        int year = Integer.parseInt(yearField.getText());
-                        String[] regizori = regizorArea.getText().split("\n");
-                        String[] actori = actorsArea.getText().split("\n");
-                        String[] genres = genresArea.getText().split("\n");
-                        String descriere = descriptionArea.getText();
-                        int numarSezoane = Integer.parseInt(sesonsField.getText());
-                        Map<String, List<Episode>> mapSerial = new HashMap<>();
-                        for (int i = 1; i <= numarSezoane; i++) {
-                            String[] episodes = episodesAreaList.get(i - 1).getText().split("\n");
-                            List<Episode> episodeList = new ArrayList<>();
-                            for (String episode : episodes) {
-                                String[] episodeDetails = episode.trim().split(" - ");
-                                if (episodeDetails.length != 2) {
-                                    // Inform the user about the improperly formatted episode
-                                    JOptionPane.showMessageDialog(this, "The episode '" + episode + "' is not formatted correctly. Please use 'Title - Type'.");
-                                    return; // Exit the method to prevent further processing
-                                }
-                                String titleEpisode = episodeDetails[0].trim();
-                                String typeEpisode = episodeDetails[1].trim();
-                                if (titleEpisode.isEmpty() || typeEpisode.isEmpty()) {
-                                    JOptionPane.showMessageDialog(this, "Title and type cannot be empty.");
-                                    return; // Exit the method to prevent further processing
-                                }
-                                // verific tipul episodului - trebuie sa fie de tipul "number minutes"
-                                String[] typeEpisodeDetails = typeEpisode.split(" ");
-                                try {
-                                    int number = Integer.parseInt(typeEpisodeDetails[0]);
-                                    if (number <= 0) {
-                                        JOptionPane.showMessageDialog(this, "The episode '" + episode + "' is not formatted correctly. Please use 'number minutes'.");
-                                        return; // Exit the method to prevent further processing
-                                    }
-                                } catch (NumberFormatException ex) {
-                                    JOptionPane.showMessageDialog(this, "The episode'" + episode + "' has to have a valid number of minutes.'");
-                                    return; // Exit the method to prevent further processing
-                                }
-                                if (typeEpisodeDetails.length != 2 || !typeEpisodeDetails[1].equals("minutes")) {
-                                    JOptionPane.showMessageDialog(this, "The episode '" + episode + "' is not formatted correctly. Please use 'number minutes'.");
-                                    return; // Exit the method to prevent further processing
-                                }
-                                episodeList.add(new Episode(titleEpisode, typeEpisode));
-                            }
-                            mapSerial.put("Sezonul " + i, episodeList);
-                        }
-                        // Contruiesc producția
-                        Series series = new Series(title, Arrays.asList(regizori), Arrays.asList(actori),
-                                Arrays.asList(genres), new ArrayList<>(), descriere, year, numarSezoane);
-                        series.setMapSerial(mapSerial);
-                        // adaug producția
-                        Staff staff = (Staff) user;
-                        staff.addProductionSystem(series);
-                        // adaug exp-ul userului
-                        user.setExperienceStrategy(new ContributionStrategy());
-                        user.updateExperience();
-                        // dau mesaj ca s-a adaugat cu succes
-                        JOptionPane.showMessageDialog(this, "Productia a fost adaugata cu succes! Ai primit experienta!");
-                    });
-                } catch (NumberFormatException ex) {
-                    JOptionPane.showMessageDialog(this, "Numarul de sezoane trebuie sa fie un numar!");
-                    return;
-                }
-
-            });
-            JScrollPane scrollPane = new JScrollPane(addProductionPanel);
-            addProductionPagePanel.add(scrollPane, BorderLayout.CENTER);
-        };
-        seriesButton.addActionListener(seriesButtonListener);
+        seriesButton.addActionListener(e -> createSeriesDialog(user));
         // adaug un listener pentru butonul de movie
-        ActionListener movieButtonListener = e3 -> {
-            // resetez panelul
-            addProductionPanel.removeAll();
-            addProductionPanel.revalidate();
-            addProductionPanel.repaint();
-            JTextField titleField = new JTextField();
-            addProductionPanel.add(new JLabel("Titlu: "));
-            addProductionPanel.add(titleField);
-            JTextField yearField = new JTextField();
-            addProductionPanel.add(new JLabel("An Lansare: Trebuie pus un numar"));
-            addProductionPanel.add(yearField);
-            JTextField durationField = new JTextField();
-            addProductionPanel.add(new JLabel("Durata: Trebuie pus un numar"));
-            addProductionPanel.add(durationField);
-            JTextArea regizorArea = new JTextArea(5, 20); // 5 rows, 20 columns
-            regizorArea.setWrapStyleWord(true);
-            regizorArea.setLineWrap(true);
-            regizorArea.setCaretPosition(0);
-            regizorArea.setEditable(true);
-            addProductionPanel.add(new JLabel("Regizor: Trebuie pus un regizor pe linie."));
-            JScrollPane regizorScrollPane = new JScrollPane(regizorArea);
-            addProductionPanel.add(regizorScrollPane);
-            JTextArea actorsArea = new JTextArea(5, 20); // 5 rows, 20 columns
-            actorsArea.setWrapStyleWord(true);
-            actorsArea.setLineWrap(true);
-            actorsArea.setCaretPosition(0);
-            actorsArea.setEditable(true);
-            addProductionPanel.add(new JLabel("Actori: Trebuie pus un actor pe linie."));
-            JScrollPane actorsScrollPane = new JScrollPane(actorsArea);
-            addProductionPanel.add(actorsScrollPane);
-            JTextArea genresArea = new JTextArea(5, 20); // 5 rows, 20 columns
-            genresArea.setWrapStyleWord(true);
-            genresArea.setLineWrap(true);
-            genresArea.setCaretPosition(0);
-            genresArea.setEditable(true);
-            addProductionPanel.add(new JLabel("Genuri: Trebuie pus un gen pe linie."));
-            JScrollPane genresScrollPane = new JScrollPane(genresArea);
-            addProductionPanel.add(genresScrollPane);
-            JTextArea descriptionArea = new JTextArea(5, 20); // 5 rows, 20 columns
-            descriptionArea.setWrapStyleWord(true);
-            descriptionArea.setLineWrap(true);
-            descriptionArea.setCaretPosition(0);
-            descriptionArea.setEditable(true);
-            addProductionPanel.add(new JLabel("Descriere: "));
-            JScrollPane descriptionScrollPane = new JScrollPane(descriptionArea);
-            addProductionPanel.add(descriptionScrollPane);
-            // vreau un buton pentru a salva producția
-            JButton saveButton = new JButton("Salveaza");
-            addProductionPanel.add(saveButton);
-            // adaug un listener pentru butonul de save
-            saveButton.addActionListener(e4 -> {
-                // vreau mai intai sa verific validitatea datelor de pana acum
-                if (titleField.getText().isEmpty()) {
-                    JOptionPane.showMessageDialog(this, "Titlul nu poate fi gol!");
-                    return;
-                }
-                try {
-                    int year = Integer.parseInt(yearField.getText());
-                    // verific daca anul este mai mare ca 0
-                    if (year <= 0) {
-                        JOptionPane.showMessageDialog(this, "Anul trebuie sa fie mai mare ca 0!");
-                        return;
-                    }
-                } catch (NumberFormatException ex) {
-                    JOptionPane.showMessageDialog(this, "Anul trebuie sa fie un numar!");
-                    return;
-                }
-                // verific daca regizorul exista
-                if (regizorArea.getText().isEmpty()) {
-                    JOptionPane.showMessageDialog(this, "Productia trebuie sa aiba macar un regizor!");
-                    return;
-                }
-                // verific daca actorii exista
-                if (actorsArea.getText().isEmpty()) {
-                    JOptionPane.showMessageDialog(this, "Productia trebuie sa aiba macar un actor!");
-                    return;
-                }
-                // verific daca genurile exista
-                if (genresArea.getText().isEmpty()) {
-                    JOptionPane.showMessageDialog(this, "Productia trebuie sa aiba macar un gen!");
-                    return;
-                }
-                // verific daca descrierea exista
-                if (descriptionArea.getText().isEmpty()) {
-                    JOptionPane.showMessageDialog(this, "Productia trebuie sa aiba o descriere!");
-                    return;
-                }
-                // verific daca durata exista
-                if (durationField.getText().isEmpty()) {
-                    JOptionPane.showMessageDialog(this, "Productia trebuie sa aiba o durata!");
-                    return;
-                }
-                // verific daca durata este un numar
-                try {
-                    int duration = Integer.parseInt(durationField.getText());
-                    // verific daca durata este mai mare ca 0
-                    if (duration <= 0) {
-                        JOptionPane.showMessageDialog(this, "Durata trebuie sa fie mai mare ca 0!");
-                        return;
-                    }
-                } catch (NumberFormatException ex) {
-                    JOptionPane.showMessageDialog(this, "Durata trebuie sa fie un numar!");
-                    return;
-                }
-                // vreau sa creez producția
-                String title = titleField.getText();
-                // verific daca productia nu exista deja
-                for (Production production : imdb.getProductionList()) {
-                    if (production.getTitlu().equals(title)) {
-                        JOptionPane.showMessageDialog(this, "Productia exista deja!");
-                        return;
-                    }
-                }
-                int year = Integer.parseInt(yearField.getText());
-                String[] regizori = regizorArea.getText().split("\n");
-                String[] actori = actorsArea.getText().split("\n");
-                String[] genres = genresArea.getText().split("\n");
-                String descriere = descriptionArea.getText();
-                // Contruiesc producția
-                Movie movie = new Movie(title, Arrays.asList(regizori), Arrays.asList(actori),
-                        Arrays.asList(genres), new ArrayList<>(), descriere, durationField.getText(), year);
-                // adaug producția
-                Staff staff = (Staff) user;
-                staff.addProductionSystem(movie);
-                // adaug exp-ul userului
-                user.setExperienceStrategy(new ContributionStrategy());
-                user.updateExperience();
-                // dau mesaj ca s-a adaugat cu succes
-                JOptionPane.showMessageDialog(this, "Productia a fost adaugata cu succes! Ai primit experienta!");
-            });
-        };
-        movieButton.addActionListener(movieButtonListener);
+        movieButton.addActionListener(e -> createMovieDialog(user));
         addProductionPanel.add(movieButton);
         addProductionPanel.add(seriesButton);
-        JButton resetButton = new JButton("Reseteaza (doar pentru Movie)");
-        resetButton.addActionListener(e5 -> {
-            // Curăță panoul și readaugă butoanele
-            addProductionPanel.removeAll();
-            movieButton.removeActionListener(movieButtonListener);
-            seriesButton.removeActionListener(seriesButtonListener);
-
-            // Readaugă butoanele și reatașează ActionListeners
-            movieButton.addActionListener(movieButtonListener);
-//            seriesButton.addActionListener(e -> {
-//                // resetez panelul
-//                addProductionPanel.removeAll();
-//                addProductionPanel.revalidate();
-//                addProductionPanel.repaint();
-//                JTextField titleField = new JTextField();
-//                addProductionPanel.add(new JLabel("Titlu: "));
-//                addProductionPanel.add(titleField);
-//                JTextField yearField = new JTextField();
-//                addProductionPanel.add(new JLabel("An Lansare: "));
-//                addProductionPanel.add(yearField);
-//                JTextField sesonsField = new JTextField();
-//                addProductionPanel.add(new JLabel("Numar Sezoane: "));
-//                addProductionPanel.add(sesonsField);
-//                JTextArea regizorArea = new JTextArea(5, 20); // 5 rows, 20 columns
-//                regizorArea.setWrapStyleWord(true);
-//                regizorArea.setLineWrap(true);
-//                regizorArea.setCaretPosition(0);
-//                regizorArea.setEditable(true);
-//                addProductionPanel.add(new JLabel("Regizor: "));
-//                JScrollPane regizorScrollPane = new JScrollPane(regizorArea);
-//                addProductionPanel.add(regizorScrollPane);
-//                JTextArea actorsArea = new JTextArea(5, 20); // 5 rows, 20 columns
-//                actorsArea.setWrapStyleWord(true);
-//                actorsArea.setLineWrap(true);
-//                actorsArea.setCaretPosition(0);
-//                actorsArea.setEditable(true);
-//                addProductionPanel.add(new JLabel("Actori: "));
-//                JScrollPane actorsScrollPane = new JScrollPane(actorsArea);
-//                addProductionPanel.add(actorsScrollPane);
-//                JTextArea genresArea = new JTextArea(5, 20); // 5 rows, 20 columns
-//                genresArea.setWrapStyleWord(true);
-//                genresArea.setLineWrap(true);
-//                genresArea.setCaretPosition(0);
-//                genresArea.setEditable(true);
-//                addProductionPanel.add(new JLabel("Genuri: "));
-//                JScrollPane genresScrollPane = new JScrollPane(genresArea);
-//                addProductionPanel.add(genresScrollPane);
-//                JTextArea descriptionArea = new JTextArea(5, 20); // 5 rows, 20 columns
-//                descriptionArea.setWrapStyleWord(true);
-//                descriptionArea.setLineWrap(true);
-//                descriptionArea.setCaretPosition(0);
-//                descriptionArea.setEditable(true);
-//                addProductionPanel.add(new JLabel("Descriere: "));
-//                JScrollPane descriptionScrollPane = new JScrollPane(descriptionArea);
-//                addProductionPanel.add(descriptionScrollPane);
-//                // vreau un buton penrtu a continua cu adaugarea producției
-//                JButton continueButton = new JButton("Continua");
-//                addProductionPanel.add(continueButton);
-//                // adaug un listener pentru butonul de continue
-//                continueButton.addActionListener(e1 -> {
-//                    // vreau mai intai sa verific validitatea datelor de pana acum
-//                    if (titleField.getText().isEmpty()) {
-//                        JOptionPane.showMessageDialog(this, "Titlul nu poate fi gol!");
-//                        return;
-//                    }
-//                    try {
-//                        int year = Integer.parseInt(yearField.getText());
-//                        // verific daca anul este mai mare ca 0
-//                        if (year <= 0) {
-//                            JOptionPane.showMessageDialog(this, "Anul trebuie sa fie mai mare ca 0!");
-//                            return;
-//                        }
-//                    } catch (NumberFormatException ex) {
-//                        JOptionPane.showMessageDialog(this, "Anul trebuie sa fie un numar!");
-//                        return;
-//                    }
-//                    // verific daca regizorul exista
-//                    if (regizorArea.getText().isEmpty()) {
-//                        JOptionPane.showMessageDialog(this, "Productia trebuie sa aiba macar un regizor!");
-//                        return;
-//                    }
-//                    // verific daca actorii exista
-//                    if (actorsArea.getText().isEmpty()) {
-//                        JOptionPane.showMessageDialog(this, "Productia trebuie sa aiba macar un actor!");
-//                        return;
-//                    }
-//                    // verific daca genurile exista
-//                    if (genresArea.getText().isEmpty()) {
-//                        JOptionPane.showMessageDialog(this, "Productia trebuie sa aiba macar un gen!");
-//                        return;
-//                    }
-//                    // verific daca descrierea exista
-//                    if (descriptionArea.getText().isEmpty()) {
-//                        JOptionPane.showMessageDialog(this, "Productia trebuie sa aiba o descriere!");
-//                        return;
-//                    }
-//                    // vreau sa stiu cate sezoane sunt ca sa stiu cate episoade sa adaug
-//                    try {
-//                        int seasons = Integer.parseInt(sesonsField.getText());
-//                        // verific daca numarul de sezoane este mai mare ca 0
-//                        if (seasons <= 0) {
-//                            JOptionPane.showMessageDialog(this, "Numarul de sezoane trebuie sa fie mai mare ca 0!");
-//                            return;
-//                        }
-//                        List<JTextArea> episodesAreaList = new ArrayList<>();
-//                        for (int i = 1; i <= seasons; i++) {
-//                            JTextArea episodesArea = new JTextArea(5, 20); // 5 rows, 20 columns
-//                            episodesArea.setWrapStyleWord(true);
-//                            episodesArea.setLineWrap(true);
-//                            episodesArea.setCaretPosition(0);
-//                            episodesArea.setEditable(true);
-//                            addProductionPanel.add(new JLabel("Episoade sezon " + i + ": "));
-//                            episodesAreaList.add(episodesArea);
-//                            JScrollPane episodesScrollPane = new JScrollPane(episodesArea);
-//                            addProductionPanel.add(episodesScrollPane);
-//                        }
-//                        // vreau un buton pentru a continua cu adaugarea producției
-//                        JButton saveButton = new JButton("Salveaza");
-//                        addProductionPanel.add(saveButton);
-//                        // adaug un listener pentru butonul de save
-//                        saveButton.addActionListener(e2 -> {
-//                            // vreau sa creez producția
-//                            String title = titleField.getText();
-//                            // verific daca productia nu exista deja
-//                            for (Production production : imdb.getProductionList()) {
-//                                if (production.getTitlu().equals(title)) {
-//                                    JOptionPane.showMessageDialog(this, "Productia exista deja!");
-//                                    return;
-//                                }
-//                            }
-//                            int year = Integer.parseInt(yearField.getText());
-//                            String[] regizori = regizorArea.getText().split("\n");
-//                            String[] actori = actorsArea.getText().split("\n");
-//                            String[] genres = genresArea.getText().split("\n");
-//                            String descriere = descriptionArea.getText();
-//                            int numarSezoane = Integer.parseInt(sesonsField.getText());
-//                            Map<String, List<Episode>> mapSerial = new HashMap<>();
-//                            for (int i = 1; i <= numarSezoane; i++) {
-//                                String[] episodes = episodesAreaList.get(i - 1).getText().split("\n");
-//                                List<Episode> episodeList = new ArrayList<>();
-//                                for (String episode : episodes) {
-//                                    String[] episodeDetails = episode.trim().split(" - ");
-//                                    if (episodeDetails.length != 2) {
-//                                        // Inform the user about the improperly formatted episode
-//                                        JOptionPane.showMessageDialog(this, "The episode '" + episode + "' is not formatted correctly. Please use 'Title - Type'.");
-//                                        return; // Exit the method to prevent further processing
-//                                    }
-//                                    String titleEpisode = episodeDetails[0].trim();
-//                                    String typeEpisode = episodeDetails[1].trim();
-//                                    if (titleEpisode.isEmpty() || typeEpisode.isEmpty()) {
-//                                        JOptionPane.showMessageDialog(this, "Title and type cannot be empty.");
-//                                        return; // Exit the method to prevent further processing
-//                                    }
-//                                    // verific tipul episodului - trebuie sa fie de tipul "number minutes"
-//                                    String[] typeEpisodeDetails = typeEpisode.split(" ");
-//                                    try {
-//                                        int number = Integer.parseInt(typeEpisodeDetails[0]);
-//                                        if (number <= 0) {
-//                                            JOptionPane.showMessageDialog(this, "The episode '" + episode + "' is not formatted correctly. Please use 'number minutes'.");
-//                                            return; // Exit the method to prevent further processing
-//                                        }
-//                                    } catch (NumberFormatException ex) {
-//                                        JOptionPane.showMessageDialog(this, "The episode'" + episode + "' has to have a valid number of minutes.'");
-//                                        return; // Exit the method to prevent further processing
-//                                    }
-//                                    if (typeEpisodeDetails.length != 2 || !typeEpisodeDetails[1].equals("minutes")) {
-//                                        JOptionPane.showMessageDialog(this, "The episode '" + episode + "' is not formatted correctly. Please use 'number minutes'.");
-//                                        return; // Exit the method to prevent further processing
-//                                    }
-//                                    episodeList.add(new Episode(titleEpisode, typeEpisode));
-//                                }
-//                                mapSerial.put("Sezonul " + i, episodeList);
-//                            }
-//                            // Contruiesc producția
-//                            Series series = new Series(title, Arrays.asList(regizori), Arrays.asList(actori),
-//                                    Arrays.asList(genres), new ArrayList<>(), descriere, year, numarSezoane);
-//                            series.setMapSerial(mapSerial);
-//                            // adaug producția
-//                            Staff staff = (Staff) user;
-//                            staff.addProductionSystem(series);
-//                            // adaug exp-ul userului
-//                            user.setExperienceStrategy(new ContributionStrategy());
-//                            user.updateExperience();
-//                            // dau mesaj ca s-a adaugat cu succes
-//                            JOptionPane.showMessageDialog(this, "Productia a fost adaugata cu succes! Ai primit experienta!");
-//                        });
-//                    } catch (NumberFormatException ex) {
-//                        JOptionPane.showMessageDialog(this, "Numarul de sezoane trebuie sa fie un numar!");
-//                        return;
-//                    }
-//
-//                });
-//                JScrollPane scrollPane = new JScrollPane(addProductionPanel);
-//                addProductionPagePanel.add(scrollPane, BorderLayout.CENTER);
-//            });
-            seriesButton.addActionListener(seriesButtonListener);
-            addProductionPanel.add(movieButton);
-            addProductionPanel.add(seriesButton);
-
-            // Repun
-            addProductionPanel.revalidate();
-            addProductionPanel.repaint();
-            addProductionPagePanel.add(addProductionPanel, BorderLayout.CENTER);
-            // Adaugă butonul de reset la partea de jos a ferestrei
-            addProductionPagePanel.add(resetButton, BorderLayout.SOUTH);
-        });
         addProductionPagePanel.add(addProductionPanel, BorderLayout.CENTER);
-        // Adaugă butonul de reset la partea de jos a ferestrei
-        addProductionPagePanel.add(resetButton, BorderLayout.SOUTH);
         return addProductionPagePanel;
     }
 
@@ -2194,7 +1997,7 @@ public class MainPage extends JFrame {
                 filteredProductions = imdb.filterByActorP(selectedActorName.getName(), filteredProductions);
             }
             try {
-                if(!durationText.isEmpty()){
+                if (!durationText.isEmpty()) {
                     int duration = Integer.parseInt(durationText);
                     filteredProductions = imdb.filterByDuration(duration, filteredProductions);
                 }
@@ -2203,7 +2006,7 @@ public class MainPage extends JFrame {
 
             }
             try {
-                if(!numberofseasonsText.isEmpty()){
+                if (!numberofseasonsText.isEmpty()) {
                     int numberofseasons = Integer.parseInt(numberofseasonsText);
                     filteredProductions = imdb.filterByNumberOfSeasons(numberofseasons, filteredProductions);
                 }
@@ -2211,7 +2014,7 @@ public class MainPage extends JFrame {
                 JOptionPane.showMessageDialog(this, "Numarul de sezoane trebuie să fie un număr! Pune un număr sau lasă câmpul gol!");
             }
             try {
-                if(!numberofreviewsText.isEmpty()){
+                if (!numberofreviewsText.isEmpty()) {
                     int numberofreviews = Integer.parseInt(numberofreviewsText);
                     filteredProductions = imdb.filterByMinimumReviews(numberofreviews, filteredProductions);
                 }
@@ -2219,7 +2022,7 @@ public class MainPage extends JFrame {
                 JOptionPane.showMessageDialog(this, "Numarul de review-uri trebuie să fie un număr! Pune un număr sau lasă câmpul gol!");
             }
             try {
-                if(!numberofepisodesText.isEmpty()){
+                if (!numberofepisodesText.isEmpty()) {
                     int numberofepisodes = Integer.parseInt(numberofepisodesText);
                     filteredProductions = imdb.filterByNumberOfEpisodes(numberofepisodes, filteredProductions);
                 }
@@ -2227,7 +2030,7 @@ public class MainPage extends JFrame {
                 JOptionPane.showMessageDialog(this, "Numarul de episoade trebuie să fie un număr! Pune un număr sau lasă câmpul gol!");
             }
             try {
-                if(!releaseanText.isEmpty()){
+                if (!releaseanText.isEmpty()) {
                     int releasean = Integer.parseInt(releaseanText);
                     filteredProductions = imdb.filterByReleaseYear(releasean, filteredProductions);
                 }
