@@ -1030,7 +1030,7 @@ public class MainPage extends JFrame {
         JPanel addProductionPagePanel = new JPanel(new BorderLayout());
         JPanel addProductionPanel = new JPanel(new GridLayout(0, 1));
         JButton movieButton = new JButton("Adauga Movie");
-        JButton seriesButton = new JButton("Adauga Series (doar unul per login session)");
+        JButton seriesButton = new JButton("Adauga Series");
         // adaug un listener pentru butonul de movie
         seriesButton.addActionListener(e -> createSeriesDialog(user));
         // adaug un listener pentru butonul de movie
