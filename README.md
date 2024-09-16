@@ -46,6 +46,7 @@ Detalii ale actorului si opțiunile prezentate sunt asemănătoare cu cele de la
 Paginile pentru producții preferate/contribuite si actori preferați/contribuiți sunt asemănătoare si nu necesita detaliere.
 
 Utilizatorii Staff au opțiunea de a adăuga actori sau producții si de a-si modifica ulterior contribuțiile. Pe lângă aceste opțiuni, utilizatorii Admin au posibilitatea de a vedea detalii despre utilizatori si chiar de a crea noi utilizatori sau de a șterge (username-ul si parola sunt generate automat si pot fi văzute doar de un utilizator daca vrea sa vadă detaliile unui utilizator)
+
 Creare user:
 
 ![img_11.png](img_11.png)
@@ -61,19 +62,19 @@ Modificare user:
 #### Request-urile
 sunt împărțite in 3 pagini:
 -	Creare request – pentru Regular si Contributor 
-  -> Am decis sa pun utilizatorul sa aleagă tipul de request, iar mai apoi daca tipul cererii este MOVIE_ISSUE sau ACTOR_ISSUE sa aleagă dintr-un dropdown numele producției/actorului (am ținut cont sa exclud contribuțiile daca utilizatorul este de tip Contributor)
+  + Am decis sa pun utilizatorul sa aleagă tipul de request, iar mai apoi daca tipul cererii este MOVIE_ISSUE sau ACTOR_ISSUE sa aleagă dintr-un dropdown numele producției/actorului (am ținut cont sa exclud contribuțiile daca utilizatorul este de tip Contributor)
 -	Vizualizare request-uri trimise – pentru Regular si Contribuitor 
-  -> Utilizatorul poate vedea câteva detalii despre request si are opțiunea sa retragă cererea. Am decis ca singura oportunitate pentru a ști rezultatul cererii sa fie notificările
+  + Utilizatorul poate vedea câteva detalii despre request si are opțiunea sa retragă cererea. Am decis ca singura oportunitate pentru a ști rezultatul cererii sa fie notificările
 -	Rezolvare request-uri – pentru Staff 
-  -> Utilizatorul poate vedea câteva detalii despre request si are 2 opțiuni: rezolvare si respingere
+  + Utilizatorul poate vedea câteva detalii despre request si are 2 opțiuni: rezolvare si respingere
   
 Notificarile sunt implementate prin intermediului pattern-ului Observer si sunt folosite pentru:
 
--	Pentru review-uri – Când un utilizator lasă un review, vor fi notificați:
+-	review-uri – Când un utilizator lasă un review, vor fi notificați:
   + Utilizatorul contribuitor 
   + Toți utilizatorii care au producția/actorul in lista de favorite 
   + Toți utilizatorii care au lăsat recenzie
--	Pentru request-uri:
+-	request-uri:
   + Când un utilizator creează un request va fi notificat responsabilul ca are un request de rezolvat 
   + Când un utilizator retrage un request va fi notificat responsabilul ca cererea a fost retrasa 
   + Când o cerere a fost rezolvata/ respinsa va fi notificat utilizatorul care a creat cererea
