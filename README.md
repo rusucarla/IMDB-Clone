@@ -63,13 +63,13 @@ Request-urile sunt împărțite in 3 pagini:
   
 Notificarile sunt implementate prin intermediului pattern-ului Observer si sunt folosite pentru:
 -	Pentru review-uri – Când un utilizator lasă un review, vor fi notificați:
-  -> Utilizatorul contribuitor 
-  -> Toți utilizatorii care au producția/actorul in lista de favorite 
-  -> Toți utilizatorii care au lăsat recenzie
+  - Utilizatorul contribuitor 
+  - Toți utilizatorii care au producția/actorul in lista de favorite 
+  - Toți utilizatorii care au lăsat recenzie
 -	Pentru request-uri:
-  -> Când un utilizator creează un request va fi notificat responsabilul ca are un request de rezolvat 
-  -> Când un utilizator retrage un request va fi notificat responsabilul ca cererea a fost retrasa 
-  -> Când o cerere a fost rezolvata/ respinsa va fi notificat utilizatorul care a creat cererea
+  - Când un utilizator creează un request va fi notificat responsabilul ca are un request de rezolvat 
+  - Când un utilizator retrage un request va fi notificat responsabilul ca cererea a fost retrasa 
+  - Când o cerere a fost rezolvata/ respinsa va fi notificat utilizatorul care a creat cererea
 
 ![img_14.png](img_14.png)
 
